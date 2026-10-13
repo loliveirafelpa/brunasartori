@@ -11,6 +11,7 @@ import { ESCALA_ENERGIA, ESCALA_SONO, HUMORES } from '../../../data/checkinOpcoe
 import ResumoPaciente from './ResumoPaciente'
 import FichaEObjetivos from './FichaEObjetivos'
 import AnotacoesClinicas from './AnotacoesClinicas'
+import { Pensamentos, Reflexoes } from './AbasRegistros'
 
 const PERIODOS = [7, 14, 30]
 
@@ -24,8 +25,6 @@ const ABAS = [
 ]
 
 const decimal = (v, casas = 1) => (v === null ? '—' : v.toFixed(casas).replace('.', ','))
-
-const Vazio = ({ children }) => <p className="rounded-2xl bg-branco p-6 text-textoSecundario shadow-sm">{children}</p>
 
 function Abas({ ativa, onChange }) {
   return (
@@ -55,48 +54,6 @@ function Abas({ ativa, onChange }) {
   )
 }
 
-function Pensamentos({ registros }) {
-  if (!registros.length) return <Vazio>Nenhum registro de pensamento neste período.</Vazio>
-  return (
-    <ul className="grid gap-3 md:grid-cols-2">
-      {registros.map((r) => (
-        <li key={r.id} className="space-y-2 rounded-2xl bg-branco p-5 text-sm shadow-sm">
-          <p className="font-interface text-xs text-textoSecundario">
-            {new Date(r.ocorridoEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
-          </p>
-          <p><strong className="font-interface text-petroleo">Situação: </strong>{r.situacao}</p>
-          <p><strong className="font-interface text-petroleo">Pensamento: </strong><em>“{r.pensamento}”</em></p>
-          <p><strong className="font-interface text-petroleo">Emoção: </strong>{r.emocao} · {r.intensidade}/10</p>
-          {r.comportamento && <p><strong className="font-interface text-petroleo">Comportamento: </strong>{r.comportamento}</p>}
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-function Reflexoes({ reflexoes, objetivosSemana }) {
-  if (!reflexoes.length) return <Vazio>Nenhuma reflexão semanal registrada.</Vazio>
-  return (
-    <ul className="grid gap-3 md:grid-cols-2">
-      {reflexoes.map((r) => {
-        const combinado = objetivosSemana.find((o) => o.semanaInicio === r.semanaInicio)
-        return (
-          <li key={r.id} className="space-y-2 rounded-2xl bg-branco p-5 text-sm shadow-sm">
-            <p className="font-interface text-xs font-semibold text-textoSecundario">
-              Semana de {formatarDia(r.semanaInicio, { day: '2-digit', month: '2-digit' })}
-              {r.percepcaoAvanco && ` · percepção de avanço ${r.percepcaoAvanco}/5`}
-            </p>
-            {combinado && <p><strong className="font-interface text-petroleo">Combinado na sessão: </strong>{combinado.texto}</p>}
-            {r.objetivo && <p><strong className="font-interface text-petroleo">Objetivo da semana: </strong>{r.objetivo}</p>}
-            {r.avancos && <p><strong className="font-interface text-petroleo">Avanços: </strong>{r.avancos}</p>}
-            {r.dificuldades && <p><strong className="font-interface text-petroleo">Dificuldades: </strong>{r.dificuldades}</p>}
-          </li>
-        )
-      })}
-    </ul>
-  )
-}
-
 const rotuloEscala = (escala, v) => (v ? escala[v - 1] : '—')
 
 function LinhaDoTempo({ dias, checkins }) {
@@ -104,7 +61,7 @@ function LinhaDoTempo({ dias, checkins }) {
   return (
     <div className="overflow-x-auto rounded-2xl bg-branco shadow-sm">
       <table className="w-full min-w-[800px] text-left text-sm">
-        <thead className="border-b border-borda font-interface text-xs uppercase tracking-wide text-textoSecundario">
+        <thead className="bg-petroleo font-interface text-[11px] uppercase tracking-wider text-nevoa">
           <tr>
             <th className="px-4 py-3">Dia</th>
             <th className="px-4 py-3">Humor</th>
