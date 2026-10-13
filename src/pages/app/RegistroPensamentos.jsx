@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { Plus, Trash2 } from 'lucide-react'
+import { CheckCircle2, ChevronDown, Trash2 } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { apagarRegistroPensamento, criarRegistroPensamento, listarRegistrosPensamento } from '../../lib/pensamentosApi'
 import { EMOCOES_SUGERIDAS, PASSOS_REGISTRO } from '../../data/pensamentosOpcoes'
@@ -9,7 +9,7 @@ import Botao from '../../components/Botao'
 
 const VAZIO = { situacao: '', pensamento: '', emocao: '', intensidade: 5, comportamento: '' }
 
-function Formulario({ userId, onSalvo, onCancelar }) {
+function Formulario({ userId, onSalvo }) {
   const [form, setForm] = useState(VAZIO)
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
@@ -24,6 +24,7 @@ function Formulario({ userId, onSalvo, onCancelar }) {
     setEnviando(true)
     try {
       const novo = await criarRegistroPensamento({ ...form, userId, intensidade: Number(form.intensidade) })
+      setForm(VAZIO)
       onSalvo(novo)
     } catch {
       setErro('Não foi possível salvar agora. Tente de novo em instantes.')
@@ -69,10 +70,7 @@ function Formulario({ userId, onSalvo, onCancelar }) {
       <Campo id="comportamento" multilinha maxLength={2000} rotulo={PASSOS_REGISTRO.comportamento.rotulo} ajuda={PASSOS_REGISTRO.comportamento.ajuda} value={form.comportamento} onChange={muda('comportamento')} />
 
       {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
-      <div className="flex gap-3">
-        <Botao type="submit" disabled={enviando} className="flex-1">{enviando ? 'Salvando…' : 'Salvar registro'}</Botao>
-        <Botao type="button" variante="secundario" onClick={onCancelar}>Cancelar</Botao>
-      </div>
+      <Botao type="submit" disabled={enviando} className="w-full">{enviando ? 'Salvando…' : 'Salvar registro'}</Botao>
     </form>
   )
 }
@@ -103,7 +101,8 @@ function Cartao({ registro, onApagar }) {
 export default function RegistroPensamentos() {
   const { usuario, perfil } = useAuth()
   const [registros, setRegistros] = useState(null)
-  const [abrindoNovo, setAbrindoNovo] = useState(false)
+  const [mostrarAnteriores, setMostrarAnteriores] = useState(false)
+  const [acabouDeSalvar, setAcabouDeSalvar] = useState(false)
   const [erro, setErro] = useState('')
 
   useEffect(() => {
@@ -133,28 +132,42 @@ export default function RegistroPensamentos() {
         </p>
       </div>
 
-      {abrindoNovo ? (
-        <Formulario
-          userId={usuario.id}
-          onSalvo={(novo) => {
-            setRegistros((rs) => [novo, ...(rs ?? [])])
-            setAbrindoNovo(false)
-          }}
-          onCancelar={() => setAbrindoNovo(false)}
-        />
-      ) : (
-        <Botao onClick={() => setAbrindoNovo(true)} className="w-full">
-          <Plus size={18} aria-hidden /> Novo registro
-        </Botao>
+      {acabouDeSalvar && (
+        <p className="flex items-center gap-2 rounded-2xl bg-nevoa p-4 text-sm text-petroleo" role="status">
+          <CheckCircle2 size={18} className="shrink-0 text-verdeAgua" aria-hidden />
+          Registro guardado. Se quiser, pode fazer outro.
+        </p>
       )}
 
+      <Formulario
+        userId={usuario.id}
+        onSalvo={(novo) => {
+          setRegistros((rs) => [novo, ...(rs ?? [])])
+          setAcabouDeSalvar(true)
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }}
+      />
+
       {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
-      {registros?.length === 0 && !abrindoNovo && (
-        <p className="rounded-2xl bg-nevoa p-5 text-sm text-textoSecundario">Você ainda não fez nenhum registro.</p>
+
+      {registros?.length > 0 && (
+        <div className="space-y-3">
+          <Botao
+            variante="secundario"
+            className="w-full"
+            onClick={() => setMostrarAnteriores((v) => !v)}
+            aria-expanded={mostrarAnteriores}
+          >
+            {mostrarAnteriores ? 'Ocultar registros anteriores' : `Ver registros anteriores (${registros.length})`}
+            <ChevronDown size={16} aria-hidden className={`transition-transform ${mostrarAnteriores ? 'rotate-180' : ''}`} />
+          </Botao>
+          {mostrarAnteriores && (
+            <ul className="space-y-3">
+              {registros.map((r) => <Cartao key={r.id} registro={r} onApagar={apagar} />)}
+            </ul>
+          )}
+        </div>
       )}
-      <ul className="space-y-3">
-        {registros?.map((r) => <Cartao key={r.id} registro={r} onApagar={apagar} />)}
-      </ul>
     </section>
   )
 }
