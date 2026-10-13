@@ -57,6 +57,8 @@ export function gerarSintese({ checkins, registros, reflexoes, dias }) {
     energiaMedia: media(doPeriodo.map((c) => c.energia)),
     acontecimentos: comAcontecimento.length,
     registrosPensamento: rpdPeriodo.length,
+    diasMovimento: doPeriodo.filter((c) => c.exercicio === true).length,
+    diasMovimentoRespondidos: doPeriodo.filter((c) => c.exercicio !== null && c.exercicio !== undefined).length,
   }
 
   const frases = []
@@ -106,6 +108,20 @@ export function gerarSintese({ checkins, registros, reflexoes, dias }) {
     if (melhor && melhor.humor >= 4) {
       const sits = melhor.situacoes.map((s) => `"${rotuloSituacao(s).toLowerCase()}"`).join(', ')
       frases.push(`O dia com humor mais alto foi ${formatarDia(melhor.data, { weekday: 'long', day: '2-digit', month: '2-digit' })}${sits ? `, com ${sits} marcado` : ''}.`)
+    }
+
+    // Movimento: só descreve a energia registrada nos dias com e sem movimento
+    const comMov = doPeriodo.filter((c) => c.exercicio === true)
+    const semMov = doPeriodo.filter((c) => c.exercicio === false)
+    if (comMov.length || semMov.length) {
+      let frase = `Movimento registrado em ${comMov.length} de ${comMov.length + semMov.length} ${plural(comMov.length + semMov.length, 'dia respondido', 'dias respondidos')}.`
+      const eCom = media(comMov.map((c) => c.energia))
+      const eSem = media(semMov.map((c) => c.energia))
+      if (eCom !== null && eSem !== null) {
+        const fmt = (v) => v.toFixed(1).replace('.', ',')
+        frase += ` Energia média registrada: ${fmt(eCom)}/5 nos dias com movimento e ${fmt(eSem)}/5 nos demais.`
+      }
+      frases.push(frase)
     }
 
     if (comAcontecimento.length) {

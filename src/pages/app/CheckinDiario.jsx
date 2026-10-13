@@ -4,7 +4,7 @@ import { Heart, Pencil } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { buscarCheckinDoDia, hojeLocal, listarCheckins, salvarCheckin } from '../../lib/checkinsApi'
 import { diasDoPeriodo, formatarDia, rotuloEmocao, rotuloSituacao } from '../../lib/sintese'
-import { EMOCOES, ESCALA_ENERGIA, ESCALA_SONO, HUMORES, SITUACOES } from '../../data/checkinOpcoes'
+import { EMOCOES, ESCALA_ENERGIA, ESCALA_SONO, HUMORES, MOVIMENTO, SITUACOES } from '../../data/checkinOpcoes'
 import EscolhaUnica from '../../components/EscolhaUnica'
 import BarraEscala from '../../components/BarraEscala'
 import EscolhaMultipla from '../../components/EscolhaMultipla'
@@ -24,6 +24,7 @@ const VAZIO = {
   sonoHoras: '',
   sonoQualidade: null,
   energia: null,
+  exercicio: null,
   acontecimento: '',
   situacoes: [],
   situacaoOutra: '',
@@ -45,6 +46,7 @@ function CartaoCheckin({ c, onEditar }) {
         </Linha>
       )}
       {c.energia && <Linha rotulo="Energia">{ESCALA_ENERGIA[c.energia - 1]}</Linha>}
+      {c.exercicio !== null && <Linha rotulo="Movimento">{c.exercicio ? 'Sim' : 'Não'}</Linha>}
       {c.acontecimento && <Linha rotulo="Acontecimento">{c.acontecimento}</Linha>}
       <Botao variante="secundario" className="mt-2" onClick={() => onEditar(c.data)}>
         <Pencil size={14} aria-hidden /> Editar este dia
@@ -204,6 +206,8 @@ export default function CheckinDiario() {
         </div>
 
         <EscolhaUnica nome="energia" legenda="Como esteve sua energia?" opcoes={escala(ESCALA_ENERGIA)} valor={form.energia} onChange={muda('energia')} />
+
+        <EscolhaUnica nome="exercicio" legenda="Você se movimentou hoje?" opcoes={MOVIMENTO} valor={form.exercicio} onChange={muda('exercicio')} colunas={2} />
 
         <Campo
           rotulo="Aconteceu algo importante hoje?"

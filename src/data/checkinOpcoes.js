@@ -31,5 +31,10 @@ export const SITUACOES = [
   { valor: 'outra', rotulo: 'Outra' },
 ]
 
+export const MOVIMENTO = [
+  { valor: true, rotulo: 'Sim' },
+  { valor: false, rotulo: 'Não' },
+]
+
 export const ESCALA_SONO = ['Muito ruim', 'Ruim', 'Regular', 'Bom', 'Muito bom']
 export const ESCALA_ENERGIA = ['Muito baixa', 'Baixa', 'Média', 'Boa', 'Muito boa']

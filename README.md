@@ -26,7 +26,7 @@ Projeto Supabase `bruna-sartori-checkin` (ref `qjkauulkxmezcuzondzj`, região S�
 |---|---|
 | `profiles` | papel (`admin`/`paciente`), nome, módulo de registro de pensamentos ativo, data de encerramento |
 | `consentimentos` | aceites de termos e de dado de saúde, com versão, data/hora e revogação |
-| `checkins` | um por paciente por dia: humor, emoção, situações associadas, ansiedade, sono, energia, acontecimento |
+| `checkins` | um por paciente por dia: humor, emoção, situações associadas, ansiedade (0–10), sono, energia, movimento (sim/não), acontecimento |
 | `reflexoes_semanais` | percepção semanal sobre objetivos terapêuticos |
 | `registros_pensamento` | situação → pensamento → emoção → intensidade → comportamento (TCC) |
 

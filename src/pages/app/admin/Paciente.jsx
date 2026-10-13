@@ -43,7 +43,7 @@ function LinhaDoTempo({ dias, checkins }) {
   const porDia = Object.fromEntries(checkins.map((c) => [c.data, c]))
   return (
     <div className="overflow-x-auto rounded-2xl bg-branco shadow-sm">
-      <table className="w-full min-w-[720px] text-left text-sm">
+      <table className="w-full min-w-[800px] text-left text-sm">
         <thead className="border-b border-borda font-interface text-xs uppercase tracking-wide text-textoSecundario">
           <tr>
             <th className="px-4 py-3">Dia</th>
@@ -52,6 +52,7 @@ function LinhaDoTempo({ dias, checkins }) {
             <th className="px-4 py-3">Ansiedade</th>
             <th className="px-4 py-3">Sono</th>
             <th className="px-4 py-3">Energia</th>
+            <th className="px-4 py-3">Movimento</th>
             <th className="px-4 py-3">Situações</th>
           </tr>
         </thead>
@@ -62,7 +63,7 @@ function LinhaDoTempo({ dias, checkins }) {
               return (
                 <tr key={dia} className="border-b border-borda last:border-0">
                   <td className="whitespace-nowrap px-4 py-3 font-interface text-xs font-semibold capitalize">{formatarDia(dia)}</td>
-                  <td colSpan={6} className="px-4 py-3 italic text-textoSecundario">sem registro</td>
+                  <td colSpan={7} className="px-4 py-3 italic text-textoSecundario">sem registro</td>
                 </tr>
               )
             }
@@ -78,6 +79,7 @@ function LinhaDoTempo({ dias, checkins }) {
                   {c.sonoHoras !== null && <span className="text-textoSecundario"> · {decimal(c.sonoHoras)}h</span>}
                 </td>
                 <td className="px-4 py-3">{rotuloEscala(ESCALA_ENERGIA, c.energia)}</td>
+                <td className="px-4 py-3">{c.exercicio === null ? '—' : c.exercicio ? 'Sim' : 'Não'}</td>
                 <td className="px-4 py-3">
                   {c.situacoes.map((s) => (s === 'outra' && c.situacaoOutra ? c.situacaoOutra : rotuloSituacao(s))).join(', ') || '—'}
                 </td>
@@ -85,7 +87,7 @@ function LinhaDoTempo({ dias, checkins }) {
               c.acontecimento && (
                 <tr key={`${dia}-acontecimento`} className="border-b border-borda last:border-0">
                   <td />
-                  <td colSpan={6} className="px-4 pb-3 text-textoSecundario">
+                  <td colSpan={7} className="px-4 pb-3 text-textoSecundario">
                     <span className="font-interface text-xs font-semibold text-petroleo">Acontecimento: </span>
                     {c.acontecimento}
                   </td>
@@ -193,6 +195,12 @@ export default function Paciente() {
             />
             <Indicador rotulo="Energia média" valor={decimal(ind.energiaMedia)} sufixo="/5" />
             <Indicador rotulo="Acontecimentos" valor={ind.acontecimentos} detalhe="relatos escritos" />
+            <Indicador
+              rotulo="Movimento"
+              valor={ind.diasMovimento}
+              sufixo={` de ${ind.diasMovimentoRespondidos}`}
+              detalhe="dias respondidos"
+            />
             <Indicador rotulo="Pensamentos" valor={ind.registrosPensamento} detalhe="registros no período" />
           </div>
 
