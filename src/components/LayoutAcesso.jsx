@@ -7,7 +7,7 @@ function Marca() {
     <div>
       <div className="flex items-center gap-4 lg:gap-6">
         <img src="/marca-cerebro.png" alt="" className="h-[4.5rem] w-auto shrink-0 lg:h-32" />
-        <p className="font-marca text-[1.7rem] font-normal leading-[1.08] text-branco lg:text-[2.9rem]">
+        <p className="font-marca text-[1.4rem] font-normal leading-[1.1] text-branco lg:text-[2.25rem]">
           Bruna
           <br />
           Sartori
