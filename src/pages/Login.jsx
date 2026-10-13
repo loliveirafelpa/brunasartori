@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../lib/AuthContext'
-import Logo from '../components/Logo'
+import LayoutAcesso from '../components/LayoutAcesso'
+import { Destaque } from '../components/Pagina'
 import Campo from '../components/Campo'
 import Botao from '../components/Botao'
 
@@ -36,22 +37,20 @@ export default function Login() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <Logo tamanho={96} />
-          <h1 className="mt-5 text-3xl">
-            Seu espaço <em className="text-salvia">entre as sessões</em>
-          </h1>
-          <p className="mt-2 text-textoSecundario">Acolher a própria história é o primeiro passo.</p>
-        </div>
-
-        <form onSubmit={entrar} className="space-y-4 rounded-2xl bg-branco p-6 shadow-sm">
+    <LayoutAcesso
+      titulo={
+        <>
+          Seu espaço <Destaque>entre as sessões</Destaque>
+        </>
+      }
+    >
+        <form onSubmit={entrar} className="space-y-4 rounded-3xl bg-branco p-6 shadow-cartao sm:p-7">
+          <h2 className="font-titulo text-2xl text-petroleo">Entrar</h2>
           <Campo rotulo="E-mail" id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           <Campo rotulo="Senha" id="senha" type="password" autoComplete="current-password" required value={senha} onChange={(e) => setSenha(e.target.value)} />
           {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
           {aviso && <p className="text-sm text-petroleo" role="status">{aviso}</p>}
-          <Botao type="submit" className="w-full" disabled={enviando}>
+          <Botao type="submit" className="w-full py-3" disabled={enviando}>
             {enviando ? 'Entrando…' : 'Entrar'}
           </Botao>
           <Botao type="button" variante="discreto" className="w-full" onClick={esqueciSenha}>
@@ -62,7 +61,6 @@ export default function Login() {
         <p className="mt-6 text-center text-xs text-textoSecundario">
           O acesso é feito por convite da sua psicóloga.
         </p>
-      </div>
-    </main>
+    </LayoutAcesso>
   )
 }

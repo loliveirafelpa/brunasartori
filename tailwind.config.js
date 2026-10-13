@@ -1,4 +1,4 @@
-import { cores, fontes } from './src/theme.js'
+import { cores, fontes, sombras } from './src/theme.js'
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -7,6 +7,7 @@ export default {
     extend: {
       colors: cores,
       fontFamily: fontes,
+      boxShadow: sombras,
     },
   },
   plugins: [],

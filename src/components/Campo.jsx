@@ -1,6 +1,6 @@
 export default function Campo({ rotulo, id, ajuda, multilinha = false, ...props }) {
   const classes =
-    'mt-1 w-full rounded-xl border border-borda bg-branco px-4 py-2.5 text-texto placeholder:text-textoSecundario focus:border-petroleo'
+    'mt-1.5 w-full rounded-xl border border-borda/70 bg-papel px-4 py-3 text-texto placeholder:text-textoSecundario/80 focus:border-petroleo focus:bg-branco'
   return (
     <div>
       <label htmlFor={id} className="font-interface text-sm font-semibold text-texto">

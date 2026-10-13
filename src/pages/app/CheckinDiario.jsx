@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Heart, Pencil } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { buscarCheckinDoDia, hojeLocal, listarCheckins, salvarCheckin } from '../../lib/checkinsApi'
 import { diasDoPeriodo, formatarDia, rotuloEmocao, rotuloSituacao } from '../../lib/sintese'
@@ -11,6 +11,8 @@ import EscolhaMultipla from '../../components/EscolhaMultipla'
 import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
 import AvisoCrise from '../../components/AvisoCrise'
+import Bloco from '../../components/Bloco'
+import Pagina, { Destaque } from '../../components/Pagina'
 import { Linha } from '../../components/RegistrosAnteriores'
 import SeletorDeDia from '../../components/SeletorDeDia'
 
@@ -123,109 +125,158 @@ export default function CheckinDiario() {
 
   const diaPorExtenso = formatarDia(data, { weekday: 'long', day: '2-digit', month: '2-digit' })
 
+  const hojePorExtenso = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
+
   if (salvo) {
     const humorBaixo = form.humor <= 2
     return (
-      <section className="mx-auto max-w-xl space-y-6 text-center">
-        <Heart className="mx-auto text-verdeAgua" size={40} aria-hidden />
-        <h1 className="text-3xl">{ehHoje ? 'Obrigada por registrar.' : 'Check-in atualizado.'}</h1>
-        <p className="text-textoSecundario">
-          {ehHoje
+      <Pagina
+        sobretitulo={ehHoje ? hojePorExtenso : diaPorExtenso}
+        titulo={
+          ehHoje ? (
+            <>
+              Obrigada por <Destaque>registrar</Destaque>.
+            </>
+          ) : (
+            <>
+              Check-in <Destaque>atualizado</Destaque>.
+            </>
+          )
+        }
+        descricao={
+          ehHoje
             ? 'Seu check-in de hoje foi guardado e vai ajudar na sua próxima sessão.'
-            : `As alterações de ${diaPorExtenso} foram guardadas.`}
-        </p>
+            : `As alterações de ${diaPorExtenso} foram guardadas.`
+        }
+      >
         {humorBaixo && <AvisoCrise destaque />}
-        <div className="flex flex-wrap justify-center gap-6">
-          <button type="button" onClick={() => editarDia(hoje)} className="font-interface text-sm font-semibold text-petroleo underline">
-            Ver check-ins
-          </button>
-          <Link to="/app" className="font-interface text-sm font-semibold text-petroleo underline">
-            Voltar para o início
-          </Link>
-        </div>
-      </section>
+        <Bloco>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              to="/app"
+              className="inline-flex flex-1 items-center justify-center rounded-full bg-petroleo px-5 py-3 font-interface text-sm font-semibold text-branco hover:bg-petroleoEscuro"
+            >
+              Voltar para o início
+            </Link>
+            <Botao variante="secundario" className="flex-1 py-3" onClick={() => editarDia(hoje)}>
+              Ver meus check-ins
+            </Botao>
+          </div>
+        </Bloco>
+      </Pagina>
     )
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-8">
-      <form onSubmit={salvar} className="space-y-8">
-        <div>
-          <h1 className="text-3xl">
-            Como foi o seu <em className="text-salvia">dia</em>?
-          </h1>
-          {ehHoje ? (
-            <p className="mt-2 text-textoSecundario">
-              {jaExistia ? 'Você já registrou hoje — pode ajustar se quiser.' : 'Leva menos de um minuto. Responda só o que fizer sentido.'}
-            </p>
-          ) : (
-            <p className="mt-2 rounded-xl bg-nevoa px-4 py-3 text-sm text-petroleo">
-              Editando o check-in de <strong className="capitalize">{diaPorExtenso}</strong>.{' '}
-              <button type="button" onClick={() => editarDia(hoje)} className="font-semibold underline">
-                Voltar para hoje
-              </button>
-            </p>
-          )}
-        </div>
+    <Pagina
+      sobretitulo={ehHoje ? hojePorExtenso : 'Editando um dia anterior'}
+      titulo={
+        <>
+          Como foi o seu <Destaque>dia</Destaque>?
+        </>
+      }
+      descricao={
+        ehHoje
+          ? jaExistia
+            ? 'Você já registrou hoje. Pode ajustar se quiser.'
+            : 'Leva menos de um minuto. Responda só o que fizer sentido.'
+          : null
+      }
+      aviso={
+        !ehHoje && (
+          <p className="rounded-2xl bg-branco/10 px-4 py-3 text-sm text-nevoa">
+            Você está editando o check-in de <strong className="capitalize text-branco">{diaPorExtenso}</strong>.{' '}
+            <button type="button" onClick={() => editarDia(hoje)} className="font-semibold text-branco underline">
+              Voltar para hoje
+            </button>
+          </p>
+        )
+      }
+    >
+      <form onSubmit={salvar} className="space-y-5">
+        <Bloco titulo="Como você está">
+          <EscolhaUnica nome="humor" legenda="Como você está se sentindo?" opcoes={HUMORES} valor={form.humor} onChange={muda('humor')} />
 
-        <EscolhaUnica nome="humor" legenda="Como você está se sentindo?" opcoes={HUMORES} valor={form.humor} onChange={muda('humor')} />
+          <div className="space-y-3">
+            <EscolhaMultipla
+              legenda="Qual emoção esteve mais presente?"
+              opcoes={EMOCOES}
+              valores={form.emocao ? [form.emocao] : []}
+              onChange={(vs) => muda('emocao')(vs.find((v) => v !== form.emocao) ?? null)}
+            />
+            {form.emocao === 'outra' && (
+              <Campo rotulo="Qual?" id="emocao-outra" maxLength={80} value={form.emocaoOutra} onChange={(e) => muda('emocaoOutra')(e.target.value)} />
+            )}
+          </div>
 
-        <div className="space-y-3">
-          <EscolhaUnica nome="emocao" legenda="Qual emoção esteve mais presente?" opcoes={EMOCOES} valor={form.emocao} onChange={muda('emocao')} colunas={4} />
-          {form.emocao === 'outra' && (
-            <Campo rotulo="Qual?" id="emocao-outra" maxLength={80} value={form.emocaoOutra} onChange={(e) => muda('emocaoOutra')(e.target.value)} />
-          )}
-        </div>
+          <div className="space-y-3">
+            <EscolhaMultipla
+              legenda="Alguma situação esteve ligada ao que você sentiu?"
+              ajuda="Opcional. Marque quantas quiser."
+              opcoes={SITUACOES}
+              valores={form.situacoes}
+              onChange={muda('situacoes')}
+            />
+            {form.situacoes.includes('outra') && (
+              <Campo rotulo="Qual situação?" id="situacao-outra" maxLength={80} value={form.situacaoOutra} onChange={(e) => muda('situacaoOutra')(e.target.value)} />
+            )}
+          </div>
+        </Bloco>
 
-        <div className="space-y-3">
-          <EscolhaMultipla
-            legenda="Alguma situação esteve ligada ao que você sentiu?"
-            ajuda="Opcional. Marque quantas quiser."
-            opcoes={SITUACOES}
-            valores={form.situacoes}
-            onChange={muda('situacoes')}
+        <Bloco titulo="Seu corpo hoje">
+          <BarraEscala
+            id="ansiedade"
+            rotulo="Quanta ansiedade ou estresse você sentiu?"
+            minimo="Nenhuma"
+            maximo="Extrema"
+            opcional
+            valor={form.ansiedade}
+            onChange={muda('ansiedade')}
           />
-          {form.situacoes.includes('outra') && (
-            <Campo rotulo="Qual situação?" id="situacao-outra" maxLength={80} value={form.situacaoOutra} onChange={(e) => muda('situacaoOutra')(e.target.value)} />
-          )}
-        </div>
 
-        <BarraEscala
-          id="ansiedade"
-          rotulo="Quanta ansiedade ou estresse você sentiu?"
-          minimo="Nenhuma"
-          maximo="Extrema"
-          opcional
-          valor={form.ansiedade}
-          onChange={muda('ansiedade')}
-        />
+          <div className="space-y-3">
+            <EscolhaUnica nome="sono" legenda="Como foi seu sono na última noite?" opcoes={escala(ESCALA_SONO)} valor={form.sonoQualidade} onChange={muda('sonoQualidade')} />
+            <Campo
+              rotulo="Quantas horas você dormiu, mais ou menos?"
+              id="sono-horas"
+              type="number"
+              min="0"
+              max="24"
+              step="0.5"
+              inputMode="decimal"
+              value={form.sonoHoras}
+              onChange={(e) => muda('sonoHoras')(e.target.value)}
+            />
+          </div>
 
-        <div className="space-y-3">
-          <EscolhaUnica nome="sono" legenda="Como foi seu sono na última noite?" opcoes={escala(ESCALA_SONO)} valor={form.sonoQualidade} onChange={muda('sonoQualidade')} />
-          <Campo rotulo="Quantas horas você dormiu, mais ou menos?" id="sono-horas" type="number" min="0" max="24" step="0.5" inputMode="decimal" value={form.sonoHoras} onChange={(e) => muda('sonoHoras')(e.target.value)} />
-        </div>
+          <EscolhaUnica nome="energia" legenda="Como esteve sua energia?" opcoes={escala(ESCALA_ENERGIA)} valor={form.energia} onChange={muda('energia')} />
 
-        <EscolhaUnica nome="energia" legenda="Como esteve sua energia?" opcoes={escala(ESCALA_ENERGIA)} valor={form.energia} onChange={muda('energia')} />
+          <EscolhaUnica nome="exercicio" legenda="Você se movimentou hoje?" opcoes={MOVIMENTO} valor={form.exercicio} onChange={muda('exercicio')} colunas={2} />
+        </Bloco>
 
-        <EscolhaUnica nome="exercicio" legenda="Você se movimentou hoje?" opcoes={MOVIMENTO} valor={form.exercicio} onChange={muda('exercicio')} colunas={2} />
+        <Bloco titulo="Seu dia">
+          <Campo
+            rotulo="Aconteceu algo importante hoje?"
+            id="acontecimento"
+            multilinha
+            maxLength={4000}
+            placeholder="Opcional. Escreva com suas palavras."
+            value={form.acontecimento}
+            onChange={(e) => muda('acontecimento')(e.target.value)}
+          />
+        </Bloco>
 
-        <Campo
-          rotulo="Aconteceu algo importante hoje?"
-          id="acontecimento"
-          multilinha
-          maxLength={4000}
-          placeholder="Opcional — escreva com suas palavras."
-          value={form.acontecimento}
-          onChange={(e) => muda('acontecimento')(e.target.value)}
-        />
-
-        {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
-        <Botao type="submit" className="w-full" disabled={enviando}>
+        {erro && <p className="px-1 text-sm text-alerta" role="alert">{erro}</p>}
+        <Botao type="submit" className="w-full py-3.5 text-base shadow-cartao" disabled={enviando}>
           {enviando ? 'Salvando…' : ehHoje ? 'Salvar check-in' : 'Salvar alterações'}
         </Botao>
       </form>
 
-      <SeletorDeDia itens={anteriores} renderItem={(c) => <CartaoCheckin c={c} onEditar={editarDia} />} />
-    </div>
+      {anteriores.length > 0 && (
+        <Bloco titulo="Check-ins anteriores">
+          <SeletorDeDia rotulo="Escolha um dia" itens={anteriores} renderItem={(c) => <CartaoCheckin c={c} onEditar={editarDia} />} />
+        </Bloco>
+      )}
+    </Pagina>
   )
 }

@@ -13,12 +13,12 @@ export default function SeletorDeDia({ itens, renderItem, rotulo = 'Registros an
 
   return (
     <div className="space-y-3">
-      <label htmlFor="dia-anterior" className="font-titulo text-lg text-petroleo">{rotulo}</label>
+      <label htmlFor="dia-anterior" className="sr-only">{rotulo}</label>
       <select
         id="dia-anterior"
         value={diaEscolhido}
         onChange={(e) => setDiaEscolhido(e.target.value)}
-        className="w-full rounded-xl border border-borda bg-branco px-4 py-2.5 font-interface text-sm text-texto focus:border-petroleo"
+        className="w-full rounded-xl border border-borda/70 bg-papel px-4 py-3 font-interface text-sm text-texto focus:border-petroleo focus:bg-branco"
       >
         <option value="">{convite} ({itens.length} {itens.length === 1 ? 'registro' : 'registros'})</option>
         {itens.map((i) => (
@@ -27,7 +27,7 @@ export default function SeletorDeDia({ itens, renderItem, rotulo = 'Registros an
           </option>
         ))}
       </select>
-      {item && <div className="space-y-2 rounded-2xl bg-branco p-5 text-sm shadow-sm">{renderItem(item)}</div>}
+      {item && <div className="space-y-2 rounded-2xl border border-borda/60 p-5 text-sm">{renderItem(item)}</div>}
     </div>
   )
 }

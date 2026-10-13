@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Handshake, Pencil, Sprout, Target } from 'lucide-react'
+import { Handshake, Pencil, Target } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { buscarReflexaoDaSemana, inicioDaSemana, listarReflexoes, salvarReflexao } from '../../lib/reflexoesApi'
 import { formatarDia } from '../../lib/sintese'
@@ -10,6 +10,8 @@ import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
 import { Linha } from '../../components/RegistrosAnteriores'
 import SeletorDeDia from '../../components/SeletorDeDia'
+import Bloco from '../../components/Bloco'
+import Pagina, { Destaque } from '../../components/Pagina'
 
 function CartaoReflexao({ r, combinado, onEditar }) {
   return (
@@ -102,118 +104,150 @@ export default function ReflexaoSemanal() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const [ano, mes, dia] = semanaInicio.split('-')
+  const [, mes, dia] = semanaInicio.split('-')
+
+  const [a, m, d] = semanaInicio.split('-').map(Number)
+  const domingo = new Date(a, m - 1, d + 6).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+  const intervalo = `${dia}/${mes} a ${domingo}`
 
   if (salvo) {
     return (
-      <section className="mx-auto max-w-xl space-y-6 text-center">
-        <Sprout className="mx-auto text-verdeAgua" size={40} aria-hidden />
-        <h1 className="text-3xl">{ehAtual ? 'Reflexão guardada.' : 'Reflexão atualizada.'}</h1>
-        <p className="text-textoSecundario">Olhar para o próprio caminho também é parte do processo.</p>
-        <div className="flex flex-wrap justify-center gap-6">
-          <button type="button" onClick={() => editarSemana(semanaAtual)} className="font-interface text-sm font-semibold text-petroleo underline">
-            Ver reflexões
-          </button>
-          <Link to="/app" className="font-interface text-sm font-semibold text-petroleo underline">
-            Voltar para o início
-          </Link>
-        </div>
-      </section>
+      <Pagina
+        sobretitulo={`Semana de ${intervalo}`}
+        titulo={
+          ehAtual ? (
+            <>
+              Reflexão <Destaque>guardada</Destaque>.
+            </>
+          ) : (
+            <>
+              Reflexão <Destaque>atualizada</Destaque>.
+            </>
+          )
+        }
+        descricao="Olhar para o próprio caminho também é parte do processo."
+      >
+        <Bloco>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              to="/app"
+              className="inline-flex flex-1 items-center justify-center rounded-full bg-petroleo px-5 py-3 font-interface text-sm font-semibold text-branco hover:bg-petroleoEscuro"
+            >
+              Voltar para o início
+            </Link>
+            <Botao variante="secundario" className="flex-1 py-3" onClick={() => editarSemana(semanaAtual)}>
+              Ver minhas reflexões
+            </Botao>
+          </div>
+        </Bloco>
+      </Pagina>
     )
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-8">
-      <form onSubmit={salvar} className="space-y-8">
-        <div>
-          <h1 className="text-3xl">
-            Sua <em className="text-salvia">semana</em>
-          </h1>
-          {ehAtual ? (
-            <p className="mt-2 text-textoSecundario">
-              Semana iniciada em {dia}/{mes}/{ano}.{' '}
-              {jaExistia ? 'Você já respondeu — pode ajustar se quiser.' : 'Pense nos objetivos que você está trabalhando na terapia.'}
+    <Pagina
+      sobretitulo={ehAtual ? `Semana de ${intervalo}` : 'Editando uma semana anterior'}
+      titulo={
+        <>
+          Sua <Destaque>semana</Destaque>
+        </>
+      }
+      descricao={
+        ehAtual
+          ? jaExistia
+            ? 'Você já respondeu esta semana. Pode ajustar se quiser.'
+            : 'Um momento para olhar para os objetivos que você está trabalhando na terapia.'
+          : null
+      }
+      aviso={
+        !ehAtual && (
+          <p className="rounded-2xl bg-branco/10 px-4 py-3 text-sm text-nevoa">
+            Você está editando a reflexão da <strong className="text-branco">semana de {intervalo}</strong>.{' '}
+            <button type="button" onClick={() => editarSemana(semanaAtual)} className="font-semibold text-branco underline">
+              Voltar para esta semana
+            </button>
+          </p>
+        )
+      }
+    >
+      <form onSubmit={salvar} className="space-y-5">
+        {combinadoDaSemana && (
+          <section className="rounded-3xl border-l-4 border-verdeAgua bg-branco p-5 shadow-cartao sm:p-7">
+            <p className="flex items-center gap-2 font-interface text-[11px] font-semibold uppercase tracking-[0.14em] text-petroleo">
+              <Handshake size={15} className="text-salvia" aria-hidden /> Combinado na sessão
             </p>
-          ) : (
-            <p className="mt-2 rounded-xl bg-nevoa px-4 py-3 text-sm text-petroleo">
-              Editando a reflexão da <strong>semana de {dia}/{mes}/{ano}</strong>.{' '}
-              <button type="button" onClick={() => editarSemana(semanaAtual)} className="font-semibold underline">
-                Voltar para esta semana
-              </button>
-            </p>
+            <p className="mt-3 whitespace-pre-wrap font-titulo text-xl italic leading-snug text-petroleo">“{combinadoDaSemana}”</p>
+          </section>
+        )}
+
+        <Bloco titulo="Sua reflexão">
+          {!combinadoDaSemana && (
+            <Campo
+              rotulo="Objetivo da semana"
+              id="objetivo"
+              multilinha
+              maxLength={2000}
+              placeholder="O que você quer praticar ou observar nesta semana?"
+              ajuda="Ex.: falar com meu chefe quando surgir insegurança, em vez de evitar."
+              value={form.objetivo}
+              onChange={(e) => muda('objetivo')(e.target.value)}
+            />
           )}
-        </div>
 
-        {objetivosGerais && (
-          <div className="rounded-2xl bg-nevoa p-5">
-            <p className="flex items-center gap-2 font-interface text-sm font-semibold text-petroleo">
-              <Target size={16} aria-hidden /> Seus objetivos na terapia
-            </p>
-            <p className="mt-2 whitespace-pre-wrap text-sm">{objetivosGerais}</p>
-          </div>
-        )}
-
-        {combinadoDaSemana ? (
-          <div className="rounded-2xl border-2 border-salvia bg-branco p-5">
-            <p className="flex items-center gap-2 font-interface text-sm font-semibold text-petroleo">
-              <Handshake size={16} aria-hidden /> Objetivo da semana · combinado na sessão
-            </p>
-            <p className="mt-2 whitespace-pre-wrap">{combinadoDaSemana}</p>
-          </div>
-        ) : (
-          <Campo
-            rotulo="Objetivo da semana"
-            id="objetivo"
-            multilinha
-            maxLength={2000}
-            placeholder="O que você quer praticar ou observar nesta semana?"
-            ajuda="Ex.: falar com meu chefe quando surgir insegurança, em vez de evitar."
-            value={form.objetivo}
-            onChange={(e) => muda('objetivo')(e.target.value)}
+          <EscolhaUnica
+            nome="percepcao"
+            legenda="Quanto você sente que avançou nos seus objetivos esta semana?"
+            opcoes={PERCEPCOES}
+            valor={form.percepcaoAvanco}
+            onChange={muda('percepcaoAvanco')}
           />
-        )}
 
-        <EscolhaUnica
-          nome="percepcao"
-          legenda="Quanto você sente que avançou nos seus objetivos esta semana?"
-          opcoes={PERCEPCOES}
-          valor={form.percepcaoAvanco}
-          onChange={muda('percepcaoAvanco')}
-        />
+          <Campo
+            rotulo="O que foi um avanço, mesmo que pequeno?"
+            id="avancos"
+            multilinha
+            maxLength={4000}
+            placeholder="Opcional"
+            value={form.avancos}
+            onChange={(e) => muda('avancos')(e.target.value)}
+          />
 
-        <Campo
-          rotulo="O que foi um avanço, mesmo que pequeno?"
-          id="avancos"
-          multilinha
-          maxLength={4000}
-          placeholder="Opcional"
-          value={form.avancos}
-          onChange={(e) => muda('avancos')(e.target.value)}
-        />
+          <Campo
+            rotulo="O que foi mais difícil?"
+            id="dificuldades"
+            multilinha
+            maxLength={4000}
+            placeholder="Opcional"
+            value={form.dificuldades}
+            onChange={(e) => muda('dificuldades')(e.target.value)}
+          />
+        </Bloco>
 
-        <Campo
-          rotulo="O que foi mais difícil?"
-          id="dificuldades"
-          multilinha
-          maxLength={4000}
-          placeholder="Opcional"
-          value={form.dificuldades}
-          onChange={(e) => muda('dificuldades')(e.target.value)}
-        />
-
-        {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
-        <Botao type="submit" className="w-full" disabled={enviando}>
+        {erro && <p className="px-1 text-sm text-alerta" role="alert">{erro}</p>}
+        <Botao type="submit" className="w-full py-3.5 text-base shadow-cartao" disabled={enviando}>
           {enviando ? 'Salvando…' : ehAtual ? 'Salvar reflexão' : 'Salvar alterações'}
         </Botao>
       </form>
 
-      <SeletorDeDia
-        itens={anteriores}
-        campoData="semanaInicio"
-        convite="Escolha uma semana"
-        formatarOpcao={(iso) => `Semana de ${formatarDia(iso, { day: '2-digit', month: '2-digit', year: 'numeric' })}`}
-        renderItem={(r) => <CartaoReflexao r={r} combinado={combinados[r.semanaInicio]} onEditar={editarSemana} />}
-      />
-    </div>
+      {anteriores.length > 0 && (
+        <Bloco titulo="Reflexões anteriores">
+          <SeletorDeDia
+            rotulo="Escolha uma semana"
+            itens={anteriores}
+            campoData="semanaInicio"
+            convite="Escolha uma semana"
+            formatarOpcao={(iso) => `Semana de ${formatarDia(iso, { day: '2-digit', month: '2-digit', year: 'numeric' })}`}
+            renderItem={(r) => <CartaoReflexao r={r} combinado={combinados[r.semanaInicio]} onEditar={editarSemana} />}
+          />
+        </Bloco>
+      )}
+
+      {/* Item fixo, definido pela psicóloga — fica por último. */}
+      {objetivosGerais && (
+        <Bloco titulo="Seus objetivos na terapia" icone={<Target size={15} />}>
+          <p className="whitespace-pre-wrap font-titulo text-lg leading-relaxed text-petroleo">{objetivosGerais}</p>
+        </Bloco>
+      )}
+    </Pagina>
   )
 }

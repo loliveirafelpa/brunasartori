@@ -13,6 +13,8 @@ import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
 import { Linha } from '../../components/RegistrosAnteriores'
 import SeletorDeDia from '../../components/SeletorDeDia'
+import Bloco from '../../components/Bloco'
+import Pagina, { Destaque } from '../../components/Pagina'
 
 const OUTRA = 'Outra'
 const VAZIO = { situacao: '', pensamento: '', emocao: '', emocaoOutra: '', intensidade: 5, comportamento: '' }
@@ -58,7 +60,7 @@ function Formulario({ userId, editando, onSalvo, onCancelarEdicao }) {
   }
 
   return (
-    <form onSubmit={salvar} className={`space-y-5 rounded-2xl bg-branco p-6 shadow-sm ${editando ? 'ring-2 ring-salvia' : ''}`}>
+    <form onSubmit={salvar} className={`space-y-6 rounded-3xl bg-branco p-5 shadow-cartao sm:p-7 ${editando ? 'ring-2 ring-verdeAgua' : ''}`}>
       {editando && (
         <p className="rounded-xl bg-nevoa px-4 py-3 text-sm text-petroleo">
           Editando o registro de{' '}
@@ -78,8 +80,8 @@ function Formulario({ userId, editando, onSalvo, onCancelarEdicao }) {
               type="button"
               aria-pressed={form.emocao === e}
               onClick={() => setForm((f) => ({ ...f, emocao: e }))}
-              className={`rounded-full border px-3 py-1.5 font-interface text-xs ${
-                form.emocao === e ? 'border-salvia bg-salvia text-branco' : 'border-borda text-texto hover:border-salvia'
+              className={`rounded-full border px-4 py-2 font-interface text-xs font-medium transition-colors ${
+                form.emocao === e ? 'border-petroleo bg-petroleo text-branco' : 'border-transparent bg-papel text-texto hover:border-salvia'
               }`}
             >
               {e}
@@ -104,7 +106,7 @@ function Formulario({ userId, editando, onSalvo, onCancelarEdicao }) {
       <Campo id="comportamento" multilinha maxLength={2000} rotulo={PASSOS_REGISTRO.comportamento.rotulo} ajuda={PASSOS_REGISTRO.comportamento.ajuda} value={form.comportamento} onChange={muda('comportamento')} />
 
       {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
-      <Botao type="submit" disabled={enviando} className="w-full">
+      <Botao type="submit" disabled={enviando} className="w-full py-3.5 text-base">
         {enviando ? 'Salvando…' : editando ? 'Salvar alterações' : 'Salvar registro'}
       </Botao>
       {editando && (
@@ -163,23 +165,22 @@ export default function RegistroPensamentos() {
   }
 
   return (
-    <section className="mx-auto max-w-xl space-y-6">
-      <div>
-        <h1 className="text-3xl">
-          Registro de <em className="text-salvia">pensamentos</em>
-        </h1>
-        <p className="mt-2 text-textoSecundario">
-          Quando algo mexer com você, anote aqui o que aconteceu, o que pensou e o que sentiu. Você e sua psicóloga podem olhar para isso na sessão.
-        </p>
-      </div>
-
-      {acabouDeSalvar && (
-        <p className="flex items-center gap-2 rounded-2xl bg-nevoa p-4 text-sm text-petroleo" role="status">
-          <CheckCircle2 size={18} className="shrink-0 text-verdeAgua" aria-hidden />
-          {acabouDeSalvar === 'editado' ? 'Registro atualizado.' : 'Registro guardado. Se quiser, pode fazer outro.'}
-        </p>
-      )}
-
+    <Pagina
+      titulo={
+        <>
+          Registro de <Destaque>pensamentos</Destaque>
+        </>
+      }
+      descricao="Quando algo mexer com você, anote o que aconteceu, o que pensou e o que sentiu. Você e sua psicóloga podem olhar para isso na sessão."
+      aviso={
+        acabouDeSalvar && (
+          <p className="flex items-center gap-2 rounded-2xl bg-branco/10 px-4 py-3 text-sm text-branco" role="status">
+            <CheckCircle2 size={18} className="shrink-0 text-verdeAgua" aria-hidden />
+            {acabouDeSalvar === 'editado' ? 'Registro atualizado.' : 'Registro guardado. Se quiser, pode fazer outro.'}
+          </p>
+        )
+      }
+    >
       <Formulario
         key={editando?.id ?? 'novo'}
         userId={usuario.id}
@@ -198,26 +199,32 @@ export default function RegistroPensamentos() {
         }}
       />
 
-      {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
+      {erro && <p className="px-1 text-sm text-alerta" role="alert">{erro}</p>}
 
-      <SeletorDeDia
-        itens={registros}
-        campoData="id"
-        convite="Escolha um registro"
-        formatarOpcao={(_, r) =>
-          `${new Date(r.ocorridoEm).toLocaleString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} · ${r.emocao}`
-        }
-        renderItem={(r) => (
-          <Cartao
-            registro={r}
-            onApagar={apagar}
-            onEditar={(reg) => {
-              setEditando(reg)
-              setAcabouDeSalvar(null)
-              window.scrollTo({ top: 0, behavior: 'smooth' })
-            }}
+      {registros?.length > 0 && (
+        <Bloco titulo="Registros anteriores">
+          <SeletorDeDia
+            rotulo="Escolha um registro"
+            itens={registros}
+            campoData="id"
+            convite="Escolha um registro"
+            formatarOpcao={(_, r) =>
+              `${new Date(r.ocorridoEm).toLocaleString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} · ${r.emocao}`
+            }
+            renderItem={(r) => (
+              <Cartao
+                registro={r}
+                onApagar={apagar}
+                onEditar={(reg) => {
+                  setEditando(reg)
+                  setAcabouDeSalvar(null)
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }}
+              />
+            )}
           />
-        )} />
-    </section>
+        </Bloco>
+      )}
+    </Pagina>
   )
 }

@@ -7,7 +7,7 @@ export default function BarraEscala({ id, rotulo, ajuda, valor, onChange, minimo
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
-        <label htmlFor={id} className="font-titulo text-lg text-petroleo">{rotulo}</label>
+        <label htmlFor={id} className="font-titulo text-lg leading-snug text-petroleo">{rotulo}</label>
         <span className="shrink-0 font-interface text-sm font-semibold text-petroleo" aria-live="polite">
           {respondido ? `${valor}/10` : <span className="font-medium text-textoSecundario">toque na barra</span>}
         </span>

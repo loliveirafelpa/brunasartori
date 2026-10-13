@@ -5,6 +5,8 @@ import { useAuth } from '../../lib/AuthContext'
 import { registrarConsentimentos } from '../../lib/consentimentosApi'
 import { TEXTO_CONSENTIMENTO_SAUDE } from '../../data/textosLegais'
 import Botao from '../../components/Botao'
+import Bloco from '../../components/Bloco'
+import Pagina, { Destaque } from '../../components/Pagina'
 
 // Exibida no primeiro acesso do paciente, antes de qualquer registro.
 // Os dois aceites são checkboxes separados (LGPD, Art. 11) e ficam gravados com data e hora.
@@ -31,44 +33,45 @@ export default function Consentimento() {
   }
 
   return (
-    <section className="mx-auto max-w-xl space-y-6">
-      <div>
-        <h1 className="text-3xl">Antes de começar</h1>
-        <p className="mt-2 text-textoSecundario">
-          Aqui você vai registrar como está se sentindo entre as sessões. Essas informações são suas e ajudam a
-          conduzir o seu processo terapêutico. Por isso, cuidamos delas com sigilo.
-        </p>
-      </div>
-
-      <div className="space-y-3 rounded-2xl bg-nevoa p-5 text-sm">
-        <p className="flex items-center gap-2 font-interface font-semibold text-petroleo">
-          <ShieldCheck size={18} aria-hidden /> Como seus dados são tratados
-        </p>
-        <ul className="list-disc space-y-1 pl-5">
+    <Pagina
+      sobretitulo="Primeiro acesso"
+      titulo={
+        <>
+          Antes de <Destaque>começar</Destaque>
+        </>
+      }
+      descricao="Aqui você vai registrar como está se sentindo entre as sessões. Essas informações são suas e ajudam a conduzir o seu processo terapêutico."
+    >
+      <Bloco titulo="Como seus dados são tratados" icone={<ShieldCheck size={15} />}>
+        <ul className="space-y-2.5 text-sm leading-relaxed">
           <li>Só você e a sua psicóloga podem ver o que você registra.</li>
           <li>Os dados são usados apenas para o seu acompanhamento. Nunca são vendidos nem compartilhados.</li>
           <li>Além da LGPD, tudo está protegido pelo sigilo profissional da Psicologia.</li>
           <li>Você pode baixar, apagar seus dados ou revogar este consentimento quando quiser, aqui no aplicativo.</li>
         </ul>
-      </div>
+      </Bloco>
 
-      <label className="flex gap-3 rounded-2xl bg-branco p-4">
-        <input type="checkbox" className="mt-1 h-5 w-5 accent-petroleo" checked={termos} onChange={(e) => setTermos(e.target.checked)} />
-        <span>Li e aceito os termos de uso e a política de privacidade.</span>
-      </label>
+      <Bloco>
+        <div className="space-y-3">
+          <label className="flex cursor-pointer gap-3 rounded-2xl bg-papel p-4 text-sm leading-relaxed">
+            <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 accent-petroleo" checked={termos} onChange={(e) => setTermos(e.target.checked)} />
+            <span>Li e aceito os termos de uso e a política de privacidade.</span>
+          </label>
 
-      <label className="flex gap-3 rounded-2xl border-2 border-salvia bg-branco p-4">
-        <input type="checkbox" className="mt-1 h-5 w-5 accent-petroleo" checked={saude} onChange={(e) => setSaude(e.target.checked)} />
-        <span>
-          <strong className="font-interface text-petroleo">Consentimento para dados de saúde. </strong>
-          {TEXTO_CONSENTIMENTO_SAUDE}
-        </span>
-      </label>
+          <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-salvia bg-branco p-4 text-sm leading-relaxed">
+            <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 accent-petroleo" checked={saude} onChange={(e) => setSaude(e.target.checked)} />
+            <span>
+              <strong className="font-interface text-petroleo">Consentimento para dados de saúde. </strong>
+              {TEXTO_CONSENTIMENTO_SAUDE}
+            </span>
+          </label>
+        </div>
 
-      {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
-      <Botao onClick={confirmar} disabled={!termos || !saude || enviando} className="w-full">
-        {enviando ? 'Registrando…' : 'Concordo e quero começar'}
-      </Botao>
-    </section>
+        {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
+        <Botao onClick={confirmar} disabled={!termos || !saude || enviando} className="w-full py-3">
+          {enviando ? 'Registrando…' : 'Concordo e quero começar'}
+        </Botao>
+      </Bloco>
+    </Pagina>
   )
 }
