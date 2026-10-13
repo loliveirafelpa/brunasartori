@@ -10,10 +10,11 @@ export const EMOCOES_SUGERIDAS = [
   'Insegurança',
 ]
 
+// Rótulos no formato definido com a Bruna (registro estruturado da TCC), cada um com exemplo.
 export const PASSOS_REGISTRO = {
-  situacao: { rotulo: 'O que aconteceu?', ajuda: 'Descreva a situação, como se contasse a alguém. Ex.: meu chefe não respondeu minha mensagem.' },
-  pensamento: { rotulo: 'O que passou pela sua cabeça?', ajuda: 'O pensamento que surgiu na hora. Ex.: provavelmente fiz alguma coisa errada.' },
-  emocao: { rotulo: 'O que você sentiu?' },
-  intensidade: { rotulo: 'Com que intensidade?', ajuda: '0 = nada, 10 = o máximo que você já sentiu.' },
-  comportamento: { rotulo: 'O que você fez em seguida?', ajuda: 'Opcional. Ex.: evitei falar com ele.' },
+  situacao: { rotulo: 'Situação', ajuda: 'Ex.: meu chefe não respondeu à mensagem.' },
+  pensamento: { rotulo: 'Pensamento', ajuda: 'Ex.: provavelmente fiz alguma coisa errada.' },
+  emocao: { rotulo: 'Emoção', ajuda: 'Ex.: ansiedade.' },
+  intensidade: { rotulo: 'Intensidade', ajuda: 'Ex.: 8/10. (0 = nada, 10 = o máximo)' },
+  comportamento: { rotulo: 'Comportamento', ajuda: 'Ex.: evitei falar com ele. (opcional)' },
 }

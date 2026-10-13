@@ -38,7 +38,7 @@ function Formulario({ userId, onSalvo, onCancelar }) {
       <Campo id="pensamento" multilinha maxLength={2000} required rotulo={PASSOS_REGISTRO.pensamento.rotulo} ajuda={PASSOS_REGISTRO.pensamento.ajuda} value={form.pensamento} onChange={muda('pensamento')} />
 
       <div>
-        <Campo id="emocao" maxLength={80} required list="emocoes-sugeridas" rotulo={PASSOS_REGISTRO.emocao.rotulo} value={form.emocao} onChange={muda('emocao')} />
+        <Campo id="emocao" maxLength={80} required list="emocoes-sugeridas" rotulo={PASSOS_REGISTRO.emocao.rotulo} ajuda={PASSOS_REGISTRO.emocao.ajuda} value={form.emocao} onChange={muda('emocao')} />
         <datalist id="emocoes-sugeridas">
           {EMOCOES_SUGERIDAS.map((e) => <option key={e} value={e} />)}
         </datalist>
@@ -90,12 +90,10 @@ function Cartao({ registro, onApagar }) {
       <dl className="space-y-2 text-sm">
         <div><dt className="font-interface font-semibold text-petroleo">Situação</dt><dd>{registro.situacao}</dd></div>
         <div><dt className="font-interface font-semibold text-petroleo">Pensamento</dt><dd className="italic">“{registro.pensamento}”</dd></div>
-        <div>
-          <dt className="font-interface font-semibold text-petroleo">Emoção</dt>
-          <dd>{registro.emocao} · intensidade {registro.intensidade}/10</dd>
-        </div>
+        <div><dt className="font-interface font-semibold text-petroleo">Emoção</dt><dd>{registro.emocao}</dd></div>
+        <div><dt className="font-interface font-semibold text-petroleo">Intensidade</dt><dd>{registro.intensidade}/10</dd></div>
         {registro.comportamento && (
-          <div><dt className="font-interface font-semibold text-petroleo">O que fiz</dt><dd>{registro.comportamento}</dd></div>
+          <div><dt className="font-interface font-semibold text-petroleo">Comportamento</dt><dd>{registro.comportamento}</dd></div>
         )}
       </dl>
     </li>
