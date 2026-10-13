@@ -12,7 +12,7 @@ const PERCEPCOES = ['Nada', 'Pouco', 'Um pouco', 'Bastante', 'Muito'].map((rotul
 export default function ReflexaoSemanal() {
   const { usuario } = useAuth()
   const semanaInicio = inicioDaSemana()
-  const [form, setForm] = useState({ percepcaoAvanco: null, avancos: '', dificuldades: '' })
+  const [form, setForm] = useState({ objetivo: '', percepcaoAvanco: null, avancos: '', dificuldades: '' })
   const [jaExistia, setJaExistia] = useState(false)
   const [salvo, setSalvo] = useState(false)
   const [erro, setErro] = useState('')
@@ -23,7 +23,12 @@ export default function ReflexaoSemanal() {
       .then((r) => {
         if (!r) return
         setJaExistia(true)
-        setForm({ percepcaoAvanco: r.percepcaoAvanco, avancos: r.avancos ?? '', dificuldades: r.dificuldades ?? '' })
+        setForm({
+          objetivo: r.objetivo ?? '',
+          percepcaoAvanco: r.percepcaoAvanco,
+          avancos: r.avancos ?? '',
+          dificuldades: r.dificuldades ?? '',
+        })
       })
       .catch(() => {})
   }, [usuario.id, semanaInicio])
@@ -33,7 +38,7 @@ export default function ReflexaoSemanal() {
   async function salvar(e) {
     e.preventDefault()
     setErro('')
-    if (!form.percepcaoAvanco && !form.avancos.trim() && !form.dificuldades.trim()) {
+    if (!form.objetivo.trim() && !form.percepcaoAvanco && !form.avancos.trim() && !form.dificuldades.trim()) {
       return setErro('Responda pelo menos uma das perguntas.')
     }
     setEnviando(true)
@@ -73,6 +78,17 @@ export default function ReflexaoSemanal() {
           {jaExistia ? 'Você já respondeu — pode ajustar se quiser.' : 'Pense nos objetivos que você está trabalhando na terapia.'}
         </p>
       </div>
+
+      <Campo
+        rotulo="Objetivo da semana"
+        id="objetivo"
+        multilinha
+        maxLength={2000}
+        placeholder="O que você quer praticar ou observar nesta semana?"
+        ajuda="Ex.: falar com meu chefe quando surgir insegurança, em vez de evitar."
+        value={form.objetivo}
+        onChange={(e) => muda('objetivo')(e.target.value)}
+      />
 
       <EscolhaUnica
         nome="percepcao"

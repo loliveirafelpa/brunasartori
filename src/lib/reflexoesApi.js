@@ -5,6 +5,7 @@ function deBanco(l) {
     id: l.id,
     userId: l.user_id,
     semanaInicio: l.semana_inicio,
+    objetivo: l.objetivo,
     percepcaoAvanco: l.percepcao_avanco,
     avancos: l.avancos,
     dificuldades: l.dificuldades,
@@ -51,6 +52,7 @@ export async function salvarReflexao(r) {
       {
         user_id: r.userId,
         semana_inicio: r.semanaInicio,
+        objetivo: r.objetivo?.trim() || null,
         percepcao_avanco: r.percepcaoAvanco,
         avancos: r.avancos?.trim() || null,
         dificuldades: r.dificuldades?.trim() || null,

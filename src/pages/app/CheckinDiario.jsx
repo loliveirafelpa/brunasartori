@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { Heart } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { buscarCheckinDoDia, hojeLocal, salvarCheckin } from '../../lib/checkinsApi'
-import { EMOCOES, ESCALA_ANSIEDADE, ESCALA_ENERGIA, ESCALA_SONO, HUMORES, SITUACOES } from '../../data/checkinOpcoes'
+import { EMOCOES, ESCALA_ENERGIA, ESCALA_SONO, HUMORES, SITUACOES } from '../../data/checkinOpcoes'
 import EscolhaUnica from '../../components/EscolhaUnica'
+import BarraEscala from '../../components/BarraEscala'
 import EscolhaMultipla from '../../components/EscolhaMultipla'
 import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
@@ -123,7 +124,15 @@ export default function CheckinDiario() {
         )}
       </div>
 
-      <EscolhaUnica nome="ansiedade" legenda="Quanta ansiedade ou estresse você sentiu?" opcoes={escala(ESCALA_ANSIEDADE)} valor={form.ansiedade} onChange={muda('ansiedade')} />
+      <BarraEscala
+        id="ansiedade"
+        rotulo="Quanta ansiedade ou estresse você sentiu?"
+        minimo="Nenhuma"
+        maximo="Extrema"
+        opcional
+        valor={form.ansiedade}
+        onChange={muda('ansiedade')}
+      />
 
       <div className="space-y-3">
         <EscolhaUnica nome="sono" legenda="Como foi seu sono na última noite?" opcoes={escala(ESCALA_SONO)} valor={form.sonoQualidade} onChange={muda('sonoQualidade')} />

@@ -31,6 +31,5 @@ export const SITUACOES = [
   { valor: 'outra', rotulo: 'Outra' },
 ]
 
-export const ESCALA_ANSIEDADE = ['Nenhuma', 'Leve', 'Moderada', 'Alta', 'Muito alta']
 export const ESCALA_SONO = ['Muito ruim', 'Ruim', 'Regular', 'Bom', 'Muito bom']
 export const ESCALA_ENERGIA = ['Muito baixa', 'Baixa', 'Média', 'Boa', 'Muito boa']

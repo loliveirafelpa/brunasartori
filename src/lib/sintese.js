@@ -3,7 +3,7 @@
 // Nunca afirma causa ("X causou Y") nem interpreta clinicamente.
 import { EMOCOES, SITUACOES } from '../data/checkinOpcoes'
 
-const ANSIEDADE_ALTA = 4 // "Alta" ou "Muito alta"
+const ANSIEDADE_ALTA = 7 // 7 ou mais na barra de 0 a 10
 const SONO_RUIM = 2 // "Ruim" ou "Muito ruim"
 const HUMOR_BAIXO = 2 // "Mal" ou "Muito mal"
 
@@ -72,7 +72,7 @@ export function gerarSintese({ checkins, registros, reflexoes, dias }) {
       const total = ansiedadeAlta.length
       // "Em todos eles" / "Em 2 deles" — evita "em 3 deles" quando são os 3.
       const quantosDeles = (n) => (n === total ? (total === 2 ? 'Em ambos' : 'Em todos eles') : `Em ${n} deles`)
-      let frase = `Ansiedade alta ou muito alta em ${total} ${plural(total, 'dia', 'dias')}.`
+      let frase = `Ansiedade ou estresse de 7/10 ou mais em ${total} ${plural(total, 'dia', 'dias')}.`
       const [topo] = ordenarContagem(contar(ansiedadeAlta.flatMap((c) => c.situacoes)))
       if (topo && topo[1] >= 2) {
         frase += ` ${quantosDeles(topo[1])}, foi marcada a situação "${rotuloSituacao(topo[0]).toLowerCase()}".`
@@ -138,6 +138,9 @@ export function gerarSintese({ checkins, registros, reflexoes, dias }) {
   }
 
   const ultimaReflexao = reflexoes[0]
+  if (ultimaReflexao?.objetivo) {
+    temas.push(`Objetivo da semana: “${trecho(ultimaReflexao.objetivo)}”. Como foi colocá-lo em prática?`)
+  }
   if (ultimaReflexao?.dificuldades) {
     temas.push(`Na reflexão semanal, apareceu como dificuldade: “${trecho(ultimaReflexao.dificuldades)}”`)
   }

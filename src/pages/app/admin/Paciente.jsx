@@ -6,7 +6,7 @@ import { listarCheckins } from '../../../lib/checkinsApi'
 import { listarRegistrosPensamento } from '../../../lib/pensamentosApi'
 import { listarReflexoes } from '../../../lib/reflexoesApi'
 import { diasDoPeriodo, formatarDia, gerarSintese, rotuloEmocao, rotuloSituacao } from '../../../lib/sintese'
-import { ESCALA_ANSIEDADE, ESCALA_ENERGIA, ESCALA_SONO, HUMORES } from '../../../data/checkinOpcoes'
+import { ESCALA_ENERGIA, ESCALA_SONO, HUMORES } from '../../../data/checkinOpcoes'
 
 const PERIODOS = [7, 14, 30]
 
@@ -72,7 +72,7 @@ function LinhaDoTempo({ dias, checkins }) {
                 <td className="whitespace-nowrap px-4 py-3 font-interface text-xs font-semibold capitalize">{formatarDia(dia)}</td>
                 <td className="whitespace-nowrap px-4 py-3"><span aria-hidden>{humor.emoji}</span> {humor.rotulo}</td>
                 <td className="px-4 py-3">{rotuloEmocao(c)}</td>
-                <td className="px-4 py-3">{rotuloEscala(ESCALA_ANSIEDADE, c.ansiedade)}</td>
+                <td className="px-4 py-3">{c.ansiedade === null ? '—' : `${c.ansiedade}/10`}</td>
                 <td className="whitespace-nowrap px-4 py-3">
                   {rotuloEscala(ESCALA_SONO, c.sonoQualidade)}
                   {c.sonoHoras !== null && <span className="text-textoSecundario"> · {decimal(c.sonoHoras)}h</span>}
@@ -184,7 +184,7 @@ export default function Paciente() {
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <Indicador rotulo="Registros" valor={ind.registros} sufixo={` de ${ind.dias}`} detalhe="dias com check-in" />
             <Indicador rotulo="Humor médio" valor={decimal(ind.humorMedio)} sufixo="/5" />
-            <Indicador rotulo="Ansiedade alta" valor={ind.diasAnsiedadeAlta} sufixo=" dias" detalhe="alta ou muito alta" />
+            <Indicador rotulo="Ansiedade alta" valor={ind.diasAnsiedadeAlta} sufixo=" dias" detalhe="7/10 ou mais" />
             <Indicador
               rotulo="Sono"
               valor={decimal(ind.sonoQualidadeMedia)}
@@ -251,6 +251,7 @@ export default function Paciente() {
                       Semana de {formatarDia(r.semanaInicio, { day: '2-digit', month: '2-digit' })}
                       {r.percepcaoAvanco && ` · percepção de avanço ${r.percepcaoAvanco}/5`}
                     </p>
+                    {r.objetivo && <p><strong className="font-interface text-petroleo">Objetivo da semana: </strong>{r.objetivo}</p>}
                     {r.avancos && <p><strong className="font-interface text-petroleo">Avanços: </strong>{r.avancos}</p>}
                     {r.dificuldades && <p><strong className="font-interface text-petroleo">Dificuldades: </strong>{r.dificuldades}</p>}
                   </li>
