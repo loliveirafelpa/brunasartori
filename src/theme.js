@@ -20,6 +20,7 @@ export const fontes = {
   titulo: ['Fraunces', 'Georgia', 'serif'], // serifada expressiva, como nos títulos dos posts
   corpo: ['"Nunito Sans"', 'system-ui', 'sans-serif'], // leitura confortável
   interface: ['Montserrat', 'system-ui', 'sans-serif'], // botões, menus, rótulos — como o texto em negrito dos posts
+  marca: ['Quicksand', 'system-ui', 'sans-serif'], // só para o nome da Bruna, no traço leve e arredondado do logo
 }
 // Sombra dos cartões, tingida de petróleo (em vez de cinza neutro).
 export const sombras = {
