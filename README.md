@@ -29,6 +29,9 @@ Projeto Supabase `bruna-sartori-checkin` (ref `qjkauulkxmezcuzondzj`, região S�
 | `checkins` | um por paciente por dia: humor, emoção, situações associadas, ansiedade (0–10), sono, energia, movimento (sim/não), acontecimento |
 | `reflexoes_semanais` | percepção semanal sobre objetivos terapêuticos |
 | `registros_pensamento` | situação → pensamento → emoção → intensidade → comportamento (TCC) |
+| `fichas_pacientes` | e-mail, WhatsApp, início do acompanhamento e **histórico** — só a Admin lê e grava |
+| `objetivos_terapeuticos` | objetivos gerais do paciente — Admin grava, paciente lê |
+| `objetivos_semana` | objetivo combinado na sessão para cada semana — Admin grava, paciente lê |
 
 **Regras garantidas no banco (RLS):**
 - Paciente só vê e altera os próprios registros; a Admin lê todos mas não edita registros de pacientes.
@@ -36,6 +39,9 @@ Projeto Supabase `bruna-sartori-checkin` (ref `qjkauulkxmezcuzondzj`, região S�
 - Registro de pensamentos só é gravado se o módulo estiver ativo para o paciente.
 - Paciente só pode alterar o próprio `nome` no perfil (papel e módulos não).
 - Funções auxiliares ficam no schema `private`, fora da API.
+- O histórico do paciente (`fichas_pacientes`) é invisível para o paciente, inclusive pela API.
+
+**Edge Function `criar-paciente`** (`supabase/functions/criar-paciente`): só a Admin chama. Cria a conta com senha provisória (`user_metadata.trocar_senha = true`, troca obrigatória no primeiro acesso), perfil, ficha e objetivos; se algo falhar, apaga a conta criada.
 
 **Tornar uma conta Admin** (uma vez, no SQL Editor do Supabase):
 ```sql
@@ -54,7 +60,8 @@ GitHub (`loliveirafelpa/brunasartori`) conectado ao Vercel; cada push na `main` 
 - A síntese é gerada por regras fixas em `src/lib/sintese.js` (sem IA): só descreve contagens e coincidências, nunca afirma causa.
 
 ## Falta
-- Edge Function de convite de paciente (Admin) e desligar cadastro aberto no Supabase Auth.
+- Desligar cadastro aberto no Supabase Auth (painel → Authentication).
+- Convite por e-mail (exige SMTP próprio, ex.: Resend) — hoje é senha provisória enviada pela psicóloga.
 - Hábitos e comportamentos (Nível 2) — aguardando conversa com a Bruna.
 - Política de privacidade, exportar/apagar dados, revogar consentimento.
 - Retenção de dados automática (aguardando prazo definido pela Bruna).

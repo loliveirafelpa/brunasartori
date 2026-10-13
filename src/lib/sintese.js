@@ -38,7 +38,7 @@ const ordenarContagem = (obj) => Object.entries(obj).sort((a, b) => b[1] - a[1])
 const plural = (n, um, varios) => (n === 1 ? um : varios)
 const trecho = (texto, max = 90) => (texto.length > max ? `${texto.slice(0, max).trimEnd()}…` : texto)
 
-export function gerarSintese({ checkins, registros, reflexoes, dias }) {
+export function gerarSintese({ checkins, registros, reflexoes, objetivosSemana = [], dias }) {
   const periodo = new Set(dias)
   const doPeriodo = checkins.filter((c) => periodo.has(c.data)).sort((a, b) => a.data.localeCompare(b.data))
   const rpdPeriodo = registros.filter((r) => periodo.has(paraIso(new Date(r.ocorridoEm))))
@@ -154,7 +154,11 @@ export function gerarSintese({ checkins, registros, reflexoes, dias }) {
   }
 
   const ultimaReflexao = reflexoes[0]
-  if (ultimaReflexao?.objetivo) {
+  // Objetivo da semana: o combinado na sessão tem prioridade sobre o escrito pelo paciente.
+  const combinado = objetivosSemana[0]
+  if (combinado) {
+    temas.push(`Combinado na sessão (semana de ${formatarDia(combinado.semanaInicio, { day: '2-digit', month: '2-digit' })}): “${trecho(combinado.texto)}”. Como foi colocá-lo em prática?`)
+  } else if (ultimaReflexao?.objetivo) {
     temas.push(`Objetivo da semana: “${trecho(ultimaReflexao.objetivo)}”. Como foi colocá-lo em prática?`)
   }
   if (ultimaReflexao?.dificuldades) {

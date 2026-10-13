@@ -10,6 +10,7 @@ import Botao from '../components/Botao'
 // O Supabase já cria a sessão a partir do link; aqui o paciente só escolhe a senha.
 export default function DefinirSenha() {
   const { sessao, carregando } = useAuth()
+  const senhaProvisoria = sessao?.user.user_metadata?.trocar_senha
   const navigate = useNavigate()
   const [senha, setSenha] = useState('')
   const [confirmacao, setConfirmacao] = useState('')
@@ -22,7 +23,7 @@ export default function DefinirSenha() {
     if (senha.length < 8) return setErro('A senha precisa ter pelo menos 8 caracteres.')
     if (senha !== confirmacao) return setErro('As senhas não são iguais.')
     setEnviando(true)
-    const { error } = await supabase.auth.updateUser({ password: senha })
+    const { error } = await supabase.auth.updateUser({ password: senha, data: { trocar_senha: false } })
     setEnviando(false)
     if (error) return setErro('Não foi possível salvar a senha. Tente abrir o link do e-mail novamente.')
     navigate('/app', { replace: true })
@@ -34,6 +35,9 @@ export default function DefinirSenha() {
         <div className="mb-8 flex flex-col items-center text-center">
           <Logo tamanho={80} />
           <h1 className="mt-5 text-3xl">Crie sua senha</h1>
+          {senhaProvisoria && (
+            <p className="mt-2 text-textoSecundario">Bem-vindo(a)! Para sua segurança, troque a senha provisória por uma só sua.</p>
+          )}
         </div>
         {carregando ? null : !sessao ? (
           <p className="rounded-2xl bg-branco p-6 text-center text-textoSecundario">

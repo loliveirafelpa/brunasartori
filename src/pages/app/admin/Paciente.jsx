@@ -5,6 +5,8 @@ import { buscarPerfil, definirRegistroPensamentos } from '../../../lib/perfisApi
 import { listarCheckins } from '../../../lib/checkinsApi'
 import { listarRegistrosPensamento } from '../../../lib/pensamentosApi'
 import { listarReflexoes } from '../../../lib/reflexoesApi'
+import { listarObjetivosSemana } from '../../../lib/objetivosApi'
+import FichaEObjetivos from './FichaEObjetivos'
 import { diasDoPeriodo, formatarDia, gerarSintese, rotuloEmocao, rotuloSituacao } from '../../../lib/sintese'
 import { ESCALA_ENERGIA, ESCALA_SONO, HUMORES } from '../../../data/checkinOpcoes'
 
@@ -119,8 +121,8 @@ export default function Paciente() {
     const [a, m, d] = dias[0].split('-').map(Number)
     const inicioLocal = new Date(a, m - 1, d).toISOString()
     setDados(null)
-    Promise.all([listarCheckins(id, dias[0]), listarRegistrosPensamento(id, inicioLocal), listarReflexoes(id)])
-      .then(([checkins, registros, reflexoes]) => setDados({ checkins, registros, reflexoes }))
+    Promise.all([listarCheckins(id, dias[0]), listarRegistrosPensamento(id, inicioLocal), listarReflexoes(id), listarObjetivosSemana(id)])
+      .then(([checkins, registros, reflexoes, objetivosSemana]) => setDados({ checkins, registros, reflexoes, objetivosSemana }))
       .catch(() => setErro('Não foi possível carregar os registros.'))
   }, [id, dias])
 
@@ -178,6 +180,8 @@ export default function Paciente() {
         </label>
         {erro && <p className="text-sm text-alerta">{erro}</p>}
       </div>
+
+      <FichaEObjetivos userId={id} />
 
       {!sintese ? (
         <p className="text-textoSecundario">Carregando registros…</p>
@@ -259,6 +263,9 @@ export default function Paciente() {
                       Semana de {formatarDia(r.semanaInicio, { day: '2-digit', month: '2-digit' })}
                       {r.percepcaoAvanco && ` · percepção de avanço ${r.percepcaoAvanco}/5`}
                     </p>
+                    {dados.objetivosSemana.find((o) => o.semanaInicio === r.semanaInicio) && (
+                      <p><strong className="font-interface text-petroleo">Combinado na sessão: </strong>{dados.objetivosSemana.find((o) => o.semanaInicio === r.semanaInicio).texto}</p>
+                    )}
                     {r.objetivo && <p><strong className="font-interface text-petroleo">Objetivo da semana: </strong>{r.objetivo}</p>}
                     {r.avancos && <p><strong className="font-interface text-petroleo">Avanços: </strong>{r.avancos}</p>}
                     {r.dificuldades && <p><strong className="font-interface text-petroleo">Dificuldades: </strong>{r.dificuldades}</p>}

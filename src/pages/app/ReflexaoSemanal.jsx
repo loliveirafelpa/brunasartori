@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Pencil, Sprout } from 'lucide-react'
+import { Handshake, Pencil, Sprout, Target } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { buscarReflexaoDaSemana, inicioDaSemana, listarReflexoes, salvarReflexao } from '../../lib/reflexoesApi'
 import { formatarDia } from '../../lib/sintese'
+import { buscarObjetivosTerapeuticos, listarObjetivosSemana } from '../../lib/objetivosApi'
 import EscolhaUnica from '../../components/EscolhaUnica'
 import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
 import { Linha } from '../../components/RegistrosAnteriores'
 import SeletorDeDia from '../../components/SeletorDeDia'
 
-function CartaoReflexao({ r, onEditar }) {
+function CartaoReflexao({ r, combinado, onEditar }) {
   return (
     <>
+      {combinado && <Linha rotulo="Combinado na sessão">{combinado}</Linha>}
       {r.objetivo && <Linha rotulo="Objetivo da semana">{r.objetivo}</Linha>}
       {r.percepcaoAvanco && <Linha rotulo="Avanço percebido">{PERCEPCOES[r.percepcaoAvanco - 1].rotulo}</Linha>}
       {r.avancos && <Linha rotulo="Avanços">{r.avancos}</Linha>}
@@ -39,6 +41,15 @@ export default function ReflexaoSemanal() {
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [anteriores, setAnteriores] = useState([])
+  const [objetivosGerais, setObjetivosGerais] = useState(null)
+  const [combinados, setCombinados] = useState({}) // semanaInicio -> texto combinado na sessão
+
+  useEffect(() => {
+    buscarObjetivosTerapeuticos(usuario.id).then((o) => setObjetivosGerais(o?.texto ?? null)).catch(() => {})
+    listarObjetivosSemana(usuario.id, 52)
+      .then((os) => setCombinados(Object.fromEntries(os.map((o) => [o.semanaInicio, o.texto]))))
+      .catch(() => {})
+  }, [usuario.id])
 
   useEffect(() => {
     listarReflexoes(usuario.id, 12)
@@ -68,7 +79,7 @@ export default function ReflexaoSemanal() {
   async function salvar(e) {
     e.preventDefault()
     setErro('')
-    if (!form.objetivo.trim() && !form.percepcaoAvanco && !form.avancos.trim() && !form.dificuldades.trim()) {
+    if (!combinadoDaSemana && !form.objetivo.trim() && !form.percepcaoAvanco && !form.avancos.trim() && !form.dificuldades.trim()) {
       return setErro('Responda pelo menos uma das perguntas.')
     }
     setEnviando(true)
@@ -82,6 +93,8 @@ export default function ReflexaoSemanal() {
       setEnviando(false)
     }
   }
+
+  const combinadoDaSemana = combinados[semanaInicio]
 
   function editarSemana(semana) {
     setSemanaInicio(semana)
@@ -131,16 +144,34 @@ export default function ReflexaoSemanal() {
           )}
         </div>
 
-        <Campo
-          rotulo="Objetivo da semana"
-          id="objetivo"
-          multilinha
-          maxLength={2000}
-          placeholder="O que você quer praticar ou observar nesta semana?"
-          ajuda="Ex.: falar com meu chefe quando surgir insegurança, em vez de evitar."
-          value={form.objetivo}
-          onChange={(e) => muda('objetivo')(e.target.value)}
-        />
+        {objetivosGerais && (
+          <div className="rounded-2xl bg-nevoa p-5">
+            <p className="flex items-center gap-2 font-interface text-sm font-semibold text-petroleo">
+              <Target size={16} aria-hidden /> Seus objetivos na terapia
+            </p>
+            <p className="mt-2 whitespace-pre-wrap text-sm">{objetivosGerais}</p>
+          </div>
+        )}
+
+        {combinadoDaSemana ? (
+          <div className="rounded-2xl border-2 border-salvia bg-branco p-5">
+            <p className="flex items-center gap-2 font-interface text-sm font-semibold text-petroleo">
+              <Handshake size={16} aria-hidden /> Objetivo da semana · combinado na sessão
+            </p>
+            <p className="mt-2 whitespace-pre-wrap">{combinadoDaSemana}</p>
+          </div>
+        ) : (
+          <Campo
+            rotulo="Objetivo da semana"
+            id="objetivo"
+            multilinha
+            maxLength={2000}
+            placeholder="O que você quer praticar ou observar nesta semana?"
+            ajuda="Ex.: falar com meu chefe quando surgir insegurança, em vez de evitar."
+            value={form.objetivo}
+            onChange={(e) => muda('objetivo')(e.target.value)}
+          />
+        )}
 
         <EscolhaUnica
           nome="percepcao"
@@ -181,7 +212,7 @@ export default function ReflexaoSemanal() {
         campoData="semanaInicio"
         convite="Escolha uma semana"
         formatarOpcao={(iso) => `Semana de ${formatarDia(iso, { day: '2-digit', month: '2-digit', year: 'numeric' })}`}
-        renderItem={(r) => <CartaoReflexao r={r} onEditar={editarSemana} />}
+        renderItem={(r) => <CartaoReflexao r={r} combinado={combinados[r.semanaInicio]} onEditar={editarSemana} />}
       />
     </div>
   )

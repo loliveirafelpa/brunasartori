@@ -13,6 +13,8 @@ export default function AppShell() {
     return <p className="p-10 text-center text-textoSecundario">Carregando…</p>
   }
   if (!sessao) return <Navigate to="/entrar" replace />
+  // Conta criada pela psicóloga com senha provisória: trocar antes de qualquer coisa.
+  if (sessao.user.user_metadata?.trocar_senha) return <Navigate to="/definir-senha" replace />
   if (!ehAdmin && !consentiu && pathname !== '/app/consentimento') {
     return <Navigate to="/app/consentimento" replace />
   }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRight, Users } from 'lucide-react'
+import { ChevronRight, UserPlus, Users } from 'lucide-react'
 import { listarPacientes } from '../../../lib/perfisApi'
 import { listarCheckinsDeTodos } from '../../../lib/checkinsApi'
 import { diasDoPeriodo, formatarDia } from '../../../lib/sintese'
@@ -23,9 +23,17 @@ export default function Pacientes() {
 
   return (
     <section className="space-y-6">
-      <h1 className="flex items-center gap-3 text-3xl">
-        <Users className="text-verdeAgua" aria-hidden /> Pacientes
-      </h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="flex items-center gap-3 text-3xl">
+          <Users className="text-verdeAgua" aria-hidden /> Pacientes
+        </h1>
+        <Link
+          to="/app/admin/pacientes/novo"
+          className="inline-flex items-center gap-2 rounded-full bg-petroleo px-5 py-2.5 font-interface text-sm font-semibold text-branco hover:bg-petroleoEscuro"
+        >
+          <UserPlus size={16} aria-hidden /> Novo paciente
+        </Link>
+      </div>
       {erro && <p className="text-alerta">{erro}</p>}
       {pacientes?.length === 0 && (
         <p className="rounded-2xl bg-branco p-6 text-textoSecundario">Nenhum paciente convidado ainda.</p>
