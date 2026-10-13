@@ -21,5 +21,10 @@ Para qualquer decisão maior, consultar o `playbook-tecnico.md` completo nesta p
 
 ## Convenções
 - `src/components`, `src/pages`, `src/pages/app`, `src/lib` (um arquivo `xxxApi.js` por assunto, snake_case ↔ camelCase, `if (error) throw error`), `src/data`, `src/theme.js`.
+- Telas do paciente usam `Pagina` (faixa petróleo + título com `Destaque` em itálico verde-água) e `Bloco` (cartão). Telas de acesso usam `LayoutAcesso`.
+- Dados exclusivos da psicóloga (ficha, anotações, medicações, comentários) têm RLS só-Admin; o paciente nunca os vê, nem pela API.
+- Toda regra nova de banco: testar simulando paciente, outro paciente e Admin (padrão `pg_temp` + `raise exception` para desfazer) e rodar o advisor de segurança.
+- Testes de fluxo que apagam/revogam: usar um paciente descartável criado pela Edge Function `criar-paciente` e apagá-lo depois — nunca o Paciente Teste.
+- Ambiente local: `npm run dev -- --port 5180`. Senhas de teste nunca vão para o repositório.
 - Commits em português, verbo no imperativo, descrevendo o efeito para quem usa. Sem `feat:`/`fix:`.
 - Manter `README.md` técnico e `docs/visao-do-produto.md` (negócio) atualizados.

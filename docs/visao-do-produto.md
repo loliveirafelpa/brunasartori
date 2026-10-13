@@ -1,62 +1,65 @@
-# Visão do produto — LOF Check-in · Bruna Sartori
+# Visão do produto — Check-in · Bruna Sartori
 
 *Documento de negócio, não técnico. Cole no início de uma conversa nova para recuperar o contexto.*
 
 ## O que é
-Um aplicativo web para a psicóloga Bruna Sartori acompanhar seus pacientes **entre as sessões**. O paciente faz um check-in rápido e opcional; a Bruna vê uma síntese organizada antes de cada sessão.
+Um aplicativo web para a psicóloga Bruna Sartori Caetano (CRP 06/106.364) acompanhar seus pacientes **entre as sessões**. O paciente registra, em poucos minutos, como está; a Bruna vê um resumo organizado antes de cada sessão, com sugestões de temas para conversar.
 
 ## Para quem
-- **Bruna (Admin):** psicóloga clínica, abordagem TCC, também neuropsicologia, atende online.
-- **Pacientes:** pessoas em psicoterapia, em geral com sessões semanais.
+- **Bruna (Admin):** psicóloga clínica, abordagem TCC, neuropsicologia, atendimento presencial e online.
+- **Pacientes:** pessoas em psicoterapia, em geral com sessões semanais. Entram só por cadastro feito pela Bruna.
 
 ## Princípio central
-O app **organiza informações e sugere temas de conversa — não afirma causas nem faz diagnóstico**. Exemplo de linguagem certa: "Em três dos quatro dias com ansiedade elevada, o sono também foi registrado como ruim." Exemplo errado: "A ansiedade está causando insônia."
+O app **organiza informações e sugere temas de conversa — não afirma causas nem faz diagnóstico**. Certo: "Em todos os dias com ansiedade alta, foi marcada a situação 'trabalho'." Errado: "O trabalho está causando a ansiedade."
 
-## Escopo
+## O que o paciente faz
+- **Check-in diário** (menos de um minuto): humor, emoção mais presente, situações ligadas ao que sentiu, ansiedade/estresse de 0 a 10, sono, energia, se se movimentou e algum acontecimento importante.
+- **Semana:** vê o "combinado na sessão" (ou escreve o próprio objetivo), diz quanto sente que avançou, o que foi avanço e o que foi difícil. Vê também seus objetivos na terapia.
+- **Registro de pensamentos** (TCC, se a Bruna ativar): situação, pensamento, emoção, intensidade e comportamento.
+- Pode rever e **editar registros de dias anteriores**.
+- **Meus dados:** baixar seus dados, revogar o consentimento, apagar o que registrou e pedir o encerramento da conta.
+- Em todas as telas, o aviso de que o app não é canal de emergência (CVV 188, SAMU 192).
 
-### Nível 1 — MVP (monitoramento essencial)
-| Dimensão | O que acompanhar | Frequência |
-|---|---|---|
-| Humor | Estado emocional (escala de 5 com emojis) | Diário |
-| Emoção predominante | Alegria, ansiedade, tristeza, irritação, medo, tranquilidade, outra | Diário |
-| Ansiedade/estresse | Intensidade percebida | Diário ou por episódio |
-| Sono | Duração e qualidade | Diário |
-| Energia | Escala 1 a 5 | Diário |
-| Acontecimentos relevantes | Texto livre (áudio em fase posterior) | Espontâneo |
-| Objetivos terapêuticos | Percepção de avanço e dificuldade | Semanal |
-
-**Painel da Bruna:** por paciente, últimos 7 dias — médias, dias com ansiedade elevada, registros feitos, eventos relevantes, linha do tempo, síntese descritiva e possíveis temas para a sessão.
-
-### Nível 2 — próximas fases
-- Gatilhos/situações associadas às emoções (com padrões descritivos).
-- **Registro de pensamentos (situação → pensamento → emoção → intensidade → comportamento)** — muito alinhado à abordagem TCC da Bruna; pode ser ativado/desativado por paciente.
-- Hábitos: atividade física, alimentação percebida, interação social, descanso, lazer, rotina de trabalho — com cuidado para não virar um sistema excessivamente quantitativo.
+## O que a Bruna faz
+- **Cadastra pacientes** (nome, e-mail, WhatsApp, início, histórico, objetivos, registro de pensamentos). O app gera uma senha provisória e uma mensagem pronta para WhatsApp; o paciente troca a senha no primeiro acesso.
+- Para cada paciente, em abas:
+  - **Resumo** do período (7, 14 ou 30 dias): números, síntese por tópico, possíveis temas para a sessão e espaço para as anotações dela em cada tópico.
+  - **Linha do tempo** dia a dia, **Semana** (reflexões) e **Pensamentos**.
+  - **Ficha e objetivos:** objetivos terapêuticos em destaque, combinados de cada semana com histórico, ficha com histórico do paciente.
+  - **Anotações clínicas:** diário dela sobre o paciente e registro de medicações (em uso e histórico).
+- Recebe na lista de pacientes os pedidos de encerramento de conta e o aviso de quem revogou o consentimento.
+- Ficha, histórico, anotações, medicações e comentários são **só dela**: o paciente não vê.
 
 ## Cuidados obrigatórios
-- **LGPD:** dado de saúde é dado sensível. Consentimento específico, separado, guardado com data e hora. Paciente pode ver, exportar e apagar seus dados.
-- **Sigilo profissional** da psicóloga, além da LGPD.
-- **Não é canal de emergência:** o app sempre mostra orientação de crise (CVV 188, SAMU 192).
+- **LGPD:** dado de saúde é dado sensível. Consentimento específico, separado, guardado com data e hora. Paciente pode ver, baixar, corrigir e apagar o que registrou.
+- **Sigilo profissional** e normas do CFP: os registros profissionais da Bruna seguem a guarda mínima exigida e não são apagados pelo paciente.
+- **Não é canal de emergência.**
 
 ## Identidade visual
-Baseada no logo e nos posts do Instagram @bru_psico (arquivo `Imagens.pptx`). Tom de voz: acolhedor, empático, validante ("Acolher a própria história é o primeiro passo para a transformação").
-- **Cores:** azul-petróleo do logo (#254C5D) como principal, verde-água do cérebro do logo (#61B7AC) para destaques, verde-sálvia e névoa clara dos fundos dos posts, fundo papel off-white.
-- **Fontes:** títulos em serifada expressiva com itálico (Fraunces), como nos posts; corpo em Nunito Sans; botões e menus em Montserrat.
-- Logo atual é PNG pequeno com fundo branco — uma versão em alta resolução/fundo transparente melhoraria o acabamento.
+Baseada no logo e nos posts do Instagram @bru_psico. Tom acolhedor e validante ("Acolher a própria história é o primeiro passo para a transformação").
+- **Cores:** azul-petróleo do logo (#254C5D), verde-água do cérebro (#61B7AC), sálvia, névoa e fundo cinza-azulado claro dos posts.
+- **Fontes:** títulos em Fraunces com palavra em itálico verde-água (como nos posts), corpo em Nunito Sans, botões e menus em Montserrat, nome da Bruna em Quicksand (traço do logo).
+- Cada tela abre com uma faixa petróleo e o título; o conteúdo vem em cartões claros. No celular, navegação fixa embaixo.
+- A tela de entrada mostra o cérebro do logo e o nome "Bruna Sartori Caetano" com o CRP.
+- Pendente: logo em arquivo vetorial (.svg/.pdf) para máxima nitidez.
 
-## Perguntas em aberto
-- Nome do app (ex.: "LOF Check-in", ou algo com a marca da Bruna).
-- Prazo de retenção dos dados após o fim do acompanhamento.
-- Lembrete diário: e-mail, notificação no navegador ou WhatsApp?
-- A Bruna quer receber algum alerta (ex.: vários dias seguidos de humor "muito mal") ou apenas a síntese antes da sessão?
-- Domínio próprio: já existe?
+## Estado atual (outubro/2026)
+- Tudo acima está construído e testado no ambiente local; código no GitHub, banco no Supabase (São Paulo).
+- Contas de teste: uma Admin e um paciente com 5 dias de registros simulados.
+- **Ainda não está publicado.** Próximos passos: publicar no Vercel, desligar o cadastro aberto no Supabase, trocar senhas de teste.
 
-## Estado atual
-13/10/2026 — Decidido: lançamento inclui Nível 1 + registro de pensamentos (TCC); paciente entra só por convite da Bruna.
-Feito: banco no Supabase (São Paulo) com todas as tabelas e regras de segurança testadas; telas de login, criar senha, consentimento LGPD e check-in diário; lista de pacientes para a Bruna. Código no GitHub.
-Também feito: telas de reflexão semanal e de registro de pensamentos; pergunta opcional de "situações ligadas ao que sentiu" (gatilhos) dentro do check-in diário. Contas de teste criadas (Admin e paciente).
-Hábitos e comportamentos ficam para depois de conversar com a Bruna, para não tornar o app quantitativo demais.
-Painel da Bruna pronto: indicadores do período (7, 14 ou 30 dias), síntese descritiva, possíveis temas para a sessão, linha do tempo dia a dia, registros de pensamento e reflexões. A Bruna liga/desliga o registro de pensamentos por paciente. Paciente de teste tem 5 dias simulados (08 a 12/10).
-14/10/2026 — Bruna cadastra pacientes pelo botão "Novo paciente" (nome, e-mail, WhatsApp, início, histórico, objetivos terapêuticos, registro de pensamentos). O app gera uma senha provisória e uma mensagem pronta para WhatsApp; o paciente troca a senha no primeiro acesso. O histórico só a Bruna vê. Objetivos em dois níveis: objetivos terapêuticos gerais e "combinado na sessão" para cada semana, ambos escritos pela Bruna e visíveis ao paciente na aba Semana; se não houver combinado, o próprio paciente escreve o objetivo.
-Privacidade pronta (15/10/2026): política de privacidade em linguagem simples e página "Meus dados" (baixar, revogar consentimento, apagar os próprios registros, pedir encerramento da conta). Pedidos aparecem para a Bruna na lista de pacientes.
-A validar com a Bruna: canal de contato para privacidade, prazo de guarda dos dados e o entendimento de que os registros profissionais dela (ficha, anotações, medicações) seguem a guarda mínima do CFP e não são apagados pelo paciente.
-Próximo: publicar no Vercel, desligar cadastro aberto, retenção automática.
+## Para validar com a Bruna
+- Canal de contato para assuntos de privacidade (hoje: "pelos canais de atendimento").
+- Prazo de guarda dos dados após o fim do acompanhamento (para exclusão automática).
+- Entendimento de que ficha, anotações e medicações seguem a guarda do CFP e não são apagados pelo paciente.
+- Se o histórico do paciente deve continuar oculto (lembrando que o paciente pode pedir acesso ao prontuário).
+- Se o "combinado na sessão" deve valer de segunda a domingo ou de sessão a sessão; e se pode haver mais de um por semana.
+- Se quer que o paciente edite dias antigos sem aviso para ela (hoje o painel mostra só a versão nova).
+- Limite de "ansiedade alta" (hoje 7/10 ou mais).
+
+## Ideias para depois
+- Lembrete diário (e-mail, notificação ou WhatsApp).
+- Alertas para a Bruna (ex.: vários dias seguidos de humor muito baixo).
+- Hábitos e comportamentos (Nível 2), com cuidado para não ficar quantitativo demais.
+- Detalhar o exercício físico (tipo e duração).
+- Domínio próprio e convite por e-mail.
