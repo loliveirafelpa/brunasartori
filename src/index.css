@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-papel font-corpo text-texto antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-titulo text-petroleo;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-verdeAgua ring-offset-2 ring-offset-papel;
+  }
+}
