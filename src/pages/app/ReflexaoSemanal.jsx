@@ -7,14 +7,12 @@ import { formatarDia } from '../../lib/sintese'
 import EscolhaUnica from '../../components/EscolhaUnica'
 import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
-import RegistrosAnteriores, { Linha } from '../../components/RegistrosAnteriores'
+import { Linha } from '../../components/RegistrosAnteriores'
+import SeletorDeDia from '../../components/SeletorDeDia'
 
 function CartaoReflexao({ r }) {
   return (
     <>
-      <p className="font-interface text-xs font-semibold text-textoSecundario">
-        Semana de {formatarDia(r.semanaInicio, { day: '2-digit', month: '2-digit' })}
-      </p>
       {r.objetivo && <Linha rotulo="Objetivo da semana">{r.objetivo}</Linha>}
       {r.percepcaoAvanco && <Linha rotulo="Avanço percebido">{PERCEPCOES[r.percepcaoAvanco - 1].rotulo}</Linha>}
       {r.avancos && <Linha rotulo="Avanços">{r.avancos}</Linha>}
@@ -148,7 +146,13 @@ export default function ReflexaoSemanal() {
         </Botao>
       </form>
 
-      <RegistrosAnteriores itens={anteriores} renderItem={(r) => <CartaoReflexao r={r} />} />
+      <SeletorDeDia
+        itens={anteriores}
+        campoData="semanaInicio"
+        convite="Escolha uma semana"
+        formatarOpcao={(iso) => `Semana de ${formatarDia(iso, { day: '2-digit', month: '2-digit', year: 'numeric' })}`}
+        renderItem={(r) => <CartaoReflexao r={r} />}
+      />
     </div>
   )
 }

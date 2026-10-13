@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { formatarDia } from '../lib/sintese'
 
-// Registros anteriores por dia: o paciente escolhe uma data e só então vê o conteúdo.
-export default function SeletorDeDia({ itens, renderItem, rotulo = 'Registros anteriores' }) {
+const formatoPadrao = (iso) => formatarDia(iso, { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+
+// Registros anteriores por data: o paciente escolhe um dia (ou semana) e só então vê o conteúdo.
+export default function SeletorDeDia({ itens, renderItem, rotulo = 'Registros anteriores', campoData = 'data', formatarOpcao = formatoPadrao, convite = 'Escolha um dia' }) {
   const [diaEscolhido, setDiaEscolhido] = useState('')
   if (!itens?.length) return null
 
-  const item = itens.find((i) => i.data === diaEscolhido)
+  const item = itens.find((i) => i[campoData] === diaEscolhido)
 
   return (
     <div className="space-y-3">
@@ -17,10 +19,10 @@ export default function SeletorDeDia({ itens, renderItem, rotulo = 'Registros an
         onChange={(e) => setDiaEscolhido(e.target.value)}
         className="w-full rounded-xl border border-borda bg-branco px-4 py-2.5 font-interface text-sm text-texto focus:border-petroleo"
       >
-        <option value="">Escolha um dia ({itens.length} {itens.length === 1 ? 'registro' : 'registros'})</option>
+        <option value="">{convite} ({itens.length} {itens.length === 1 ? 'registro' : 'registros'})</option>
         {itens.map((i) => (
-          <option key={i.data} value={i.data}>
-            {formatarDia(i.data, { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
+          <option key={i[campoData]} value={i[campoData]}>
+            {formatarOpcao(i[campoData])}
           </option>
         ))}
       </select>
