@@ -61,31 +61,34 @@ export function gerarSintese({ checkins, registros, reflexoes, objetivosSemana =
     diasMovimentoRespondidos: doPeriodo.filter((c) => c.exercicio !== null && c.exercicio !== undefined).length,
   }
 
+  // frases: [{ rotulo, texto }] — o rótulo diz de que dimensão a frase fala.
+  // temas: [{ origem, citacao, pergunta }] — de onde veio, o trecho registrado e uma pergunta possível.
   const frases = []
   const temas = []
+  const diaCurto = (iso) => formatarDia(iso, { weekday: 'long', day: '2-digit', month: '2-digit' })
 
   if (!doPeriodo.length) {
-    frases.push('Nenhum check-in registrado neste período.')
+    frases.push({ rotulo: 'Registros', texto: 'Nenhum check-in neste período.' })
   } else {
-    frases.push(`Check-in registrado em ${doPeriodo.length} de ${dias.length} dias.`)
+    frases.push({ rotulo: 'Registros', texto: `Check-in em ${doPeriodo.length} de ${dias.length} dias.` })
 
-    // Situações associadas aos dias de ansiedade alta
+    // Situações e sono nos dias de ansiedade alta
     if (ansiedadeAlta.length) {
       const total = ansiedadeAlta.length
       // "Em todos eles" / "Em 2 deles" — evita "em 3 deles" quando são os 3.
-      const quantosDeles = (n) => (n === total ? (total === 2 ? 'Em ambos' : 'Em todos eles') : `Em ${n} deles`)
-      let frase = `Ansiedade ou estresse de 7/10 ou mais em ${total} ${plural(total, 'dia', 'dias')}.`
+      const quantosDeles = (n) => (n === total ? (total === 2 ? 'Em ambos' : 'Em todos') : `Em ${n} deles`)
+      let texto = `7/10 ou mais em ${total} ${plural(total, 'dia', 'dias')}.`
       const [topo] = ordenarContagem(contar(ansiedadeAlta.flatMap((c) => c.situacoes)))
       if (topo && topo[1] >= 2) {
-        frase += ` ${quantosDeles(topo[1])}, foi marcada a situação "${rotuloSituacao(topo[0]).toLowerCase()}".`
+        texto += ` ${quantosDeles(topo[1])}, foi marcada a situação “${rotuloSituacao(topo[0]).toLowerCase()}”.`
       }
       const comSonoRuim = ansiedadeAlta.filter((c) => c.sonoQualidade !== null && c.sonoQualidade <= SONO_RUIM).length
       if (comSonoRuim && total > 1) {
-        frase += ` ${quantosDeles(comSonoRuim)}, o sono também foi registrado como ruim ou muito ruim.`
+        texto += ` ${quantosDeles(comSonoRuim)}, o sono também foi registrado como ruim ou muito ruim.`
       } else if (comSonoRuim) {
-        frase += ' Nesse dia, o sono também foi registrado como ruim ou muito ruim.'
+        texto += ' Nesse dia, o sono também foi registrado como ruim ou muito ruim.'
       }
-      frases.push(frase)
+      frases.push({ rotulo: 'Ansiedade', texto })
     }
 
     // Maior sequência de dias corridos (no calendário) com humor baixo
@@ -100,32 +103,37 @@ export function gerarSintese({ checkins, registros, reflexoes, objetivosSemana =
       const n = humorBaixo.length
       let complemento = '.'
       if (maiorSeq >= 2) complemento = maiorSeq === n ? ' seguidos.' : `, sendo ${maiorSeq} seguidos.`
-      frases.push(`Humor registrado como "mal" ou "muito mal" em ${n} ${plural(n, 'dia', 'dias')}${complemento}`)
+      frases.push({ rotulo: 'Humor', texto: `“Mal” ou “muito mal” em ${n} ${plural(n, 'dia', 'dias')}${complemento}` })
     }
 
     // Dia de melhor humor
     const melhor = [...doPeriodo].sort((a, b) => b.humor - a.humor || (b.sonoQualidade ?? 0) - (a.sonoQualidade ?? 0))[0]
     if (melhor && melhor.humor >= 4) {
-      const sits = melhor.situacoes.map((s) => `"${rotuloSituacao(s).toLowerCase()}"`).join(', ')
-      frases.push(`O dia com humor mais alto foi ${formatarDia(melhor.data, { weekday: 'long', day: '2-digit', month: '2-digit' })}${sits ? `, com ${sits} marcado` : ''}.`)
+      const sits = melhor.situacoes.map((s) => `“${rotuloSituacao(s).toLowerCase()}”`).join(', ')
+      const dia = diaCurto(melhor.data)
+      frases.push({ rotulo: 'Melhor dia', texto: `${dia.charAt(0).toUpperCase()}${dia.slice(1)}${sits ? `, com ${sits} marcado` : ''}.` })
     }
 
     // Movimento: só descreve a energia registrada nos dias com e sem movimento
     const comMov = doPeriodo.filter((c) => c.exercicio === true)
     const semMov = doPeriodo.filter((c) => c.exercicio === false)
     if (comMov.length || semMov.length) {
-      let frase = `Movimento registrado em ${comMov.length} de ${comMov.length + semMov.length} ${plural(comMov.length + semMov.length, 'dia respondido', 'dias respondidos')}.`
+      const respondidos = comMov.length + semMov.length
+      let texto = `Em ${comMov.length} de ${respondidos} ${plural(respondidos, 'dia respondido', 'dias respondidos')}.`
       const eCom = media(comMov.map((c) => c.energia))
       const eSem = media(semMov.map((c) => c.energia))
       if (eCom !== null && eSem !== null) {
         const fmt = (v) => v.toFixed(1).replace('.', ',')
-        frase += ` Energia média registrada: ${fmt(eCom)}/5 nos dias com movimento e ${fmt(eSem)}/5 nos demais.`
+        texto += ` Energia média registrada: ${fmt(eCom)}/5 nesses dias e ${fmt(eSem)}/5 nos demais.`
       }
-      frases.push(frase)
+      frases.push({ rotulo: 'Movimento', texto })
     }
 
     if (comAcontecimento.length) {
-      frases.push(`${comAcontecimento.length} ${plural(comAcontecimento.length, 'acontecimento relevante descrito', 'acontecimentos relevantes descritos')}.`)
+      frases.push({
+        rotulo: 'Acontecimentos',
+        texto: `${comAcontecimento.length} ${plural(comAcontecimento.length, 'relato escrito', 'relatos escritos')}.`,
+      })
     }
 
     // Temas: acontecimentos de dias mais difíceis
@@ -133,36 +141,62 @@ export function gerarSintese({ checkins, registros, reflexoes, objetivosSemana =
       .filter((c) => c.humor <= HUMOR_BAIXO || c.ansiedade >= ANSIEDADE_ALTA)
       .slice(0, 2)
       .forEach((c) =>
-        temas.push(`Você gostaria de conversar sobre o que registrou ${formatarDia(c.data, { weekday: 'long' })}: “${trecho(c.acontecimento)}”?`),
+        temas.push({
+          origem: `Acontecimento · ${diaCurto(c.data)}`,
+          citacao: trecho(c.acontecimento, 160),
+          pergunta: 'Você gostaria de conversar sobre isso?',
+        }),
       )
 
     const [sitTopo] = ordenarContagem(contar(doPeriodo.flatMap((c) => c.situacoes)))
     if (sitTopo && sitTopo[1] >= 2 && sitTopo[0] !== 'outra') {
-      temas.push(`"${rotuloSituacao(sitTopo[0])}" foi marcado em ${sitTopo[1]} dias. Como você tem percebido essa área nestes dias?`)
+      temas.push({
+        origem: `Situação marcada em ${sitTopo[1]} dias · ${rotuloSituacao(sitTopo[0])}`,
+        citacao: null,
+        pergunta: `Como você tem percebido a área de “${rotuloSituacao(sitTopo[0]).toLowerCase()}” nestes dias?`,
+      })
     }
   }
 
   if (rpdPeriodo.length) {
     const [emoTopo] = ordenarContagem(contar(rpdPeriodo.map((r) => r.emocao.toLowerCase())))
     const intensidade = media(rpdPeriodo.map((r) => r.intensidade))
-    frases.push(
-      `${rpdPeriodo.length} ${plural(rpdPeriodo.length, 'registro de pensamento', 'registros de pensamento')}` +
-        ` (emoção mais citada: ${emoTopo[0]}; intensidade média ${intensidade.toFixed(1).replace('.', ',')}/10).`,
-    )
+    frases.push({
+      rotulo: 'Pensamentos',
+      texto:
+        `${rpdPeriodo.length} ${plural(rpdPeriodo.length, 'registro', 'registros')}. Emoção mais citada: ${emoTopo[0]}; ` +
+        `intensidade média ${intensidade.toFixed(1).replace('.', ',')}/10.`,
+    })
     const maisIntenso = [...rpdPeriodo].sort((a, b) => b.intensidade - a.intensidade)[0]
-    temas.push(`Revisitar o registro de pensamento “${trecho(maisIntenso.pensamento, 70)}” (${maisIntenso.emocao.toLowerCase()}, ${maisIntenso.intensidade}/10).`)
+    temas.push({
+      origem: `Registro de pensamento · ${maisIntenso.emocao.toLowerCase()} ${maisIntenso.intensidade}/10`,
+      citacao: trecho(maisIntenso.pensamento, 160),
+      pergunta: 'O que você percebe hoje sobre esse pensamento?',
+    })
   }
 
   const ultimaReflexao = reflexoes[0]
   // Objetivo da semana: o combinado na sessão tem prioridade sobre o escrito pelo paciente.
   const combinado = objetivosSemana[0]
   if (combinado) {
-    temas.push(`Combinado na sessão (semana de ${formatarDia(combinado.semanaInicio, { day: '2-digit', month: '2-digit' })}): “${trecho(combinado.texto)}”. Como foi colocá-lo em prática?`)
+    temas.push({
+      origem: `Combinado na sessão · semana de ${formatarDia(combinado.semanaInicio, { day: '2-digit', month: '2-digit' })}`,
+      citacao: trecho(combinado.texto, 160),
+      pergunta: 'Como foi colocar isso em prática?',
+    })
   } else if (ultimaReflexao?.objetivo) {
-    temas.push(`Objetivo da semana: “${trecho(ultimaReflexao.objetivo)}”. Como foi colocá-lo em prática?`)
+    temas.push({
+      origem: 'Objetivo da semana · escrito pelo paciente',
+      citacao: trecho(ultimaReflexao.objetivo, 160),
+      pergunta: 'Como foi colocar isso em prática?',
+    })
   }
   if (ultimaReflexao?.dificuldades) {
-    temas.push(`Na reflexão semanal, apareceu como dificuldade: “${trecho(ultimaReflexao.dificuldades)}”`)
+    temas.push({
+      origem: 'Reflexão semanal · o que foi mais difícil',
+      citacao: trecho(ultimaReflexao.dificuldades, 160),
+      pergunta: 'Como isso apareceu ao longo da semana?',
+    })
   }
 
   return { indicadores, frases, temas, checkinsDoPeriodo: doPeriodo, registrosDoPeriodo: rpdPeriodo }
