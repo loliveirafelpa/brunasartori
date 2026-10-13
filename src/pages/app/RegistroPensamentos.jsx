@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { CheckCircle2, ChevronDown, Trash2 } from 'lucide-react'
+import { CheckCircle2, Trash2 } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { apagarRegistroPensamento, criarRegistroPensamento, listarRegistrosPensamento } from '../../lib/pensamentosApi'
 import { EMOCOES_SUGERIDAS, PASSOS_REGISTRO } from '../../data/pensamentosOpcoes'
 import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
+import RegistrosAnteriores, { Linha } from '../../components/RegistrosAnteriores'
 
 const VAZIO = { situacao: '', pensamento: '', emocao: '', intensidade: 5, comportamento: '' }
 
@@ -78,30 +79,25 @@ function Formulario({ userId, onSalvo }) {
 function Cartao({ registro, onApagar }) {
   const quando = new Date(registro.ocorridoEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
   return (
-    <li className="space-y-3 rounded-2xl bg-branco p-5 shadow-sm">
+    <>
       <div className="flex items-start justify-between gap-3">
         <p className="font-interface text-xs text-textoSecundario">{quando}</p>
         <button onClick={() => onApagar(registro)} className="text-textoSecundario hover:text-alerta" aria-label="Apagar registro">
           <Trash2 size={16} />
         </button>
       </div>
-      <dl className="space-y-2 text-sm">
-        <div><dt className="font-interface font-semibold text-petroleo">Situação</dt><dd>{registro.situacao}</dd></div>
-        <div><dt className="font-interface font-semibold text-petroleo">Pensamento</dt><dd className="italic">“{registro.pensamento}”</dd></div>
-        <div><dt className="font-interface font-semibold text-petroleo">Emoção</dt><dd>{registro.emocao}</dd></div>
-        <div><dt className="font-interface font-semibold text-petroleo">Intensidade</dt><dd>{registro.intensidade}/10</dd></div>
-        {registro.comportamento && (
-          <div><dt className="font-interface font-semibold text-petroleo">Comportamento</dt><dd>{registro.comportamento}</dd></div>
-        )}
-      </dl>
-    </li>
+      <Linha rotulo="Situação">{registro.situacao}</Linha>
+      <Linha rotulo="Pensamento"><em>“{registro.pensamento}”</em></Linha>
+      <Linha rotulo="Emoção">{registro.emocao}</Linha>
+      <Linha rotulo="Intensidade">{registro.intensidade}/10</Linha>
+      {registro.comportamento && <Linha rotulo="Comportamento">{registro.comportamento}</Linha>}
+    </>
   )
 }
 
 export default function RegistroPensamentos() {
   const { usuario, perfil } = useAuth()
   const [registros, setRegistros] = useState(null)
-  const [mostrarAnteriores, setMostrarAnteriores] = useState(false)
   const [acabouDeSalvar, setAcabouDeSalvar] = useState(false)
   const [erro, setErro] = useState('')
 
@@ -150,24 +146,7 @@ export default function RegistroPensamentos() {
 
       {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
 
-      {registros?.length > 0 && (
-        <div className="space-y-3">
-          <Botao
-            variante="secundario"
-            className="w-full"
-            onClick={() => setMostrarAnteriores((v) => !v)}
-            aria-expanded={mostrarAnteriores}
-          >
-            {mostrarAnteriores ? 'Ocultar registros anteriores' : `Ver registros anteriores (${registros.length})`}
-            <ChevronDown size={16} aria-hidden className={`transition-transform ${mostrarAnteriores ? 'rotate-180' : ''}`} />
-          </Botao>
-          {mostrarAnteriores && (
-            <ul className="space-y-3">
-              {registros.map((r) => <Cartao key={r.id} registro={r} onApagar={apagar} />)}
-            </ul>
-          )}
-        </div>
-      )}
+      <RegistrosAnteriores itens={registros} renderItem={(r) => <Cartao registro={r} onApagar={apagar} />} />
     </section>
   )
 }

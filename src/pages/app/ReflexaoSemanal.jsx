@@ -2,10 +2,26 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Sprout } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
-import { buscarReflexaoDaSemana, inicioDaSemana, salvarReflexao } from '../../lib/reflexoesApi'
+import { buscarReflexaoDaSemana, inicioDaSemana, listarReflexoes, salvarReflexao } from '../../lib/reflexoesApi'
+import { formatarDia } from '../../lib/sintese'
 import EscolhaUnica from '../../components/EscolhaUnica'
 import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
+import RegistrosAnteriores, { Linha } from '../../components/RegistrosAnteriores'
+
+function CartaoReflexao({ r }) {
+  return (
+    <>
+      <p className="font-interface text-xs font-semibold text-textoSecundario">
+        Semana de {formatarDia(r.semanaInicio, { day: '2-digit', month: '2-digit' })}
+      </p>
+      {r.objetivo && <Linha rotulo="Objetivo da semana">{r.objetivo}</Linha>}
+      {r.percepcaoAvanco && <Linha rotulo="Avanço percebido">{PERCEPCOES[r.percepcaoAvanco - 1].rotulo}</Linha>}
+      {r.avancos && <Linha rotulo="Avanços">{r.avancos}</Linha>}
+      {r.dificuldades && <Linha rotulo="O que foi mais difícil">{r.dificuldades}</Linha>}
+    </>
+  )
+}
 
 const PERCEPCOES = ['Nada', 'Pouco', 'Um pouco', 'Bastante', 'Muito'].map((rotulo, i) => ({ valor: i + 1, rotulo }))
 
@@ -17,6 +33,13 @@ export default function ReflexaoSemanal() {
   const [salvo, setSalvo] = useState(false)
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
+  const [anteriores, setAnteriores] = useState([])
+
+  useEffect(() => {
+    listarReflexoes(usuario.id, 12)
+      .then((rs) => setAnteriores(rs.filter((r) => r.semanaInicio !== semanaInicio)))
+      .catch(() => {})
+  }, [usuario.id, semanaInicio])
 
   useEffect(() => {
     buscarReflexaoDaSemana(usuario.id, semanaInicio)
@@ -68,60 +91,64 @@ export default function ReflexaoSemanal() {
   const [ano, mes, dia] = semanaInicio.split('-')
 
   return (
-    <form onSubmit={salvar} className="mx-auto max-w-xl space-y-8">
-      <div>
-        <h1 className="text-3xl">
-          Sua <em className="text-salvia">semana</em>
-        </h1>
-        <p className="mt-2 text-textoSecundario">
-          Semana iniciada em {dia}/{mes}/{ano}.{' '}
-          {jaExistia ? 'Você já respondeu — pode ajustar se quiser.' : 'Pense nos objetivos que você está trabalhando na terapia.'}
-        </p>
-      </div>
+    <div className="mx-auto max-w-xl space-y-8">
+      <form onSubmit={salvar} className="space-y-8">
+        <div>
+          <h1 className="text-3xl">
+            Sua <em className="text-salvia">semana</em>
+          </h1>
+          <p className="mt-2 text-textoSecundario">
+            Semana iniciada em {dia}/{mes}/{ano}.{' '}
+            {jaExistia ? 'Você já respondeu — pode ajustar se quiser.' : 'Pense nos objetivos que você está trabalhando na terapia.'}
+          </p>
+        </div>
 
-      <Campo
-        rotulo="Objetivo da semana"
-        id="objetivo"
-        multilinha
-        maxLength={2000}
-        placeholder="O que você quer praticar ou observar nesta semana?"
-        ajuda="Ex.: falar com meu chefe quando surgir insegurança, em vez de evitar."
-        value={form.objetivo}
-        onChange={(e) => muda('objetivo')(e.target.value)}
-      />
+        <Campo
+          rotulo="Objetivo da semana"
+          id="objetivo"
+          multilinha
+          maxLength={2000}
+          placeholder="O que você quer praticar ou observar nesta semana?"
+          ajuda="Ex.: falar com meu chefe quando surgir insegurança, em vez de evitar."
+          value={form.objetivo}
+          onChange={(e) => muda('objetivo')(e.target.value)}
+        />
 
-      <EscolhaUnica
-        nome="percepcao"
-        legenda="Quanto você sente que avançou nos seus objetivos esta semana?"
-        opcoes={PERCEPCOES}
-        valor={form.percepcaoAvanco}
-        onChange={muda('percepcaoAvanco')}
-      />
+        <EscolhaUnica
+          nome="percepcao"
+          legenda="Quanto você sente que avançou nos seus objetivos esta semana?"
+          opcoes={PERCEPCOES}
+          valor={form.percepcaoAvanco}
+          onChange={muda('percepcaoAvanco')}
+        />
 
-      <Campo
-        rotulo="O que foi um avanço, mesmo que pequeno?"
-        id="avancos"
-        multilinha
-        maxLength={4000}
-        placeholder="Opcional"
-        value={form.avancos}
-        onChange={(e) => muda('avancos')(e.target.value)}
-      />
+        <Campo
+          rotulo="O que foi um avanço, mesmo que pequeno?"
+          id="avancos"
+          multilinha
+          maxLength={4000}
+          placeholder="Opcional"
+          value={form.avancos}
+          onChange={(e) => muda('avancos')(e.target.value)}
+        />
 
-      <Campo
-        rotulo="O que foi mais difícil?"
-        id="dificuldades"
-        multilinha
-        maxLength={4000}
-        placeholder="Opcional"
-        value={form.dificuldades}
-        onChange={(e) => muda('dificuldades')(e.target.value)}
-      />
+        <Campo
+          rotulo="O que foi mais difícil?"
+          id="dificuldades"
+          multilinha
+          maxLength={4000}
+          placeholder="Opcional"
+          value={form.dificuldades}
+          onChange={(e) => muda('dificuldades')(e.target.value)}
+        />
 
-      {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
-      <Botao type="submit" className="w-full" disabled={enviando}>
-        {enviando ? 'Salvando…' : 'Salvar reflexão'}
-      </Botao>
-    </form>
+        {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
+        <Botao type="submit" className="w-full" disabled={enviando}>
+          {enviando ? 'Salvando…' : 'Salvar reflexão'}
+        </Botao>
+      </form>
+
+      <RegistrosAnteriores itens={anteriores} renderItem={(r) => <CartaoReflexao r={r} />} />
+    </div>
   )
 }
