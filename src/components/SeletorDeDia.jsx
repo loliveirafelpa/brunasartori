@@ -3,7 +3,8 @@ import { formatarDia } from '../lib/sintese'
 
 const formatoPadrao = (iso) => formatarDia(iso, { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
 
-// Registros anteriores por data: o paciente escolhe um dia (ou semana) e só então vê o conteúdo.
+// Registros anteriores numa lista de escolha: o paciente escolhe um dia, semana ou registro
+// e só então vê o conteúdo. `formatarOpcao` recebe o valor do campo e o item inteiro.
 export default function SeletorDeDia({ itens, renderItem, rotulo = 'Registros anteriores', campoData = 'data', formatarOpcao = formatoPadrao, convite = 'Escolha um dia' }) {
   const [diaEscolhido, setDiaEscolhido] = useState('')
   if (!itens?.length) return null
@@ -22,7 +23,7 @@ export default function SeletorDeDia({ itens, renderItem, rotulo = 'Registros an
         <option value="">{convite} ({itens.length} {itens.length === 1 ? 'registro' : 'registros'})</option>
         {itens.map((i) => (
           <option key={i[campoData]} value={i[campoData]}>
-            {formatarOpcao(i[campoData])}
+            {formatarOpcao(i[campoData], i)}
           </option>
         ))}
       </select>

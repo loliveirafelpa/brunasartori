@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Sprout } from 'lucide-react'
+import { Pencil, Sprout } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { buscarReflexaoDaSemana, inicioDaSemana, listarReflexoes, salvarReflexao } from '../../lib/reflexoesApi'
 import { formatarDia } from '../../lib/sintese'
@@ -10,23 +10,30 @@ import Botao from '../../components/Botao'
 import { Linha } from '../../components/RegistrosAnteriores'
 import SeletorDeDia from '../../components/SeletorDeDia'
 
-function CartaoReflexao({ r }) {
+function CartaoReflexao({ r, onEditar }) {
   return (
     <>
       {r.objetivo && <Linha rotulo="Objetivo da semana">{r.objetivo}</Linha>}
       {r.percepcaoAvanco && <Linha rotulo="Avanço percebido">{PERCEPCOES[r.percepcaoAvanco - 1].rotulo}</Linha>}
       {r.avancos && <Linha rotulo="Avanços">{r.avancos}</Linha>}
       {r.dificuldades && <Linha rotulo="O que foi mais difícil">{r.dificuldades}</Linha>}
+      <Botao variante="secundario" className="mt-2" onClick={() => onEditar(r.semanaInicio)}>
+        <Pencil size={14} aria-hidden /> Editar esta semana
+      </Botao>
     </>
   )
 }
+
+const VAZIO = { objetivo: '', percepcaoAvanco: null, avancos: '', dificuldades: '' }
 
 const PERCEPCOES = ['Nada', 'Pouco', 'Um pouco', 'Bastante', 'Muito'].map((rotulo, i) => ({ valor: i + 1, rotulo }))
 
 export default function ReflexaoSemanal() {
   const { usuario } = useAuth()
-  const semanaInicio = inicioDaSemana()
-  const [form, setForm] = useState({ objetivo: '', percepcaoAvanco: null, avancos: '', dificuldades: '' })
+  const semanaAtual = inicioDaSemana()
+  const [semanaInicio, setSemanaInicio] = useState(semanaAtual) // semana atual ou uma anterior em edição
+  const ehAtual = semanaInicio === semanaAtual
+  const [form, setForm] = useState(VAZIO)
   const [jaExistia, setJaExistia] = useState(false)
   const [salvo, setSalvo] = useState(false)
   const [erro, setErro] = useState('')
@@ -35,11 +42,13 @@ export default function ReflexaoSemanal() {
 
   useEffect(() => {
     listarReflexoes(usuario.id, 12)
-      .then((rs) => setAnteriores(rs.filter((r) => r.semanaInicio !== semanaInicio)))
+      .then((rs) => setAnteriores(rs.filter((r) => r.semanaInicio !== semanaAtual)))
       .catch(() => {})
-  }, [usuario.id, semanaInicio])
+  }, [usuario.id, semanaAtual])
 
   useEffect(() => {
+    setForm(VAZIO)
+    setJaExistia(false)
     buscarReflexaoDaSemana(usuario.id, semanaInicio)
       .then((r) => {
         if (!r) return
@@ -64,7 +73,8 @@ export default function ReflexaoSemanal() {
     }
     setEnviando(true)
     try {
-      await salvarReflexao({ ...form, userId: usuario.id, semanaInicio })
+      const salva = await salvarReflexao({ ...form, userId: usuario.id, semanaInicio })
+      if (!ehAtual) setAnteriores((rs) => rs.map((r) => (r.semanaInicio === semanaInicio ? salva : r)))
       setSalvo(true)
     } catch {
       setErro('Não foi possível salvar agora. Suas respostas continuam aqui — tente de novo em instantes.')
@@ -73,20 +83,31 @@ export default function ReflexaoSemanal() {
     }
   }
 
+  function editarSemana(semana) {
+    setSemanaInicio(semana)
+    setSalvo(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const [ano, mes, dia] = semanaInicio.split('-')
+
   if (salvo) {
     return (
       <section className="mx-auto max-w-xl space-y-6 text-center">
         <Sprout className="mx-auto text-verdeAgua" size={40} aria-hidden />
-        <h1 className="text-3xl">Reflexão guardada.</h1>
+        <h1 className="text-3xl">{ehAtual ? 'Reflexão guardada.' : 'Reflexão atualizada.'}</h1>
         <p className="text-textoSecundario">Olhar para o próprio caminho também é parte do processo.</p>
-        <Link to="/app" className="inline-block font-interface text-sm font-semibold text-petroleo underline">
-          Voltar para o início
-        </Link>
+        <div className="flex flex-wrap justify-center gap-6">
+          <button type="button" onClick={() => editarSemana(semanaAtual)} className="font-interface text-sm font-semibold text-petroleo underline">
+            Ver reflexões
+          </button>
+          <Link to="/app" className="font-interface text-sm font-semibold text-petroleo underline">
+            Voltar para o início
+          </Link>
+        </div>
       </section>
     )
   }
-
-  const [ano, mes, dia] = semanaInicio.split('-')
 
   return (
     <div className="mx-auto max-w-xl space-y-8">
@@ -95,10 +116,19 @@ export default function ReflexaoSemanal() {
           <h1 className="text-3xl">
             Sua <em className="text-salvia">semana</em>
           </h1>
-          <p className="mt-2 text-textoSecundario">
-            Semana iniciada em {dia}/{mes}/{ano}.{' '}
-            {jaExistia ? 'Você já respondeu — pode ajustar se quiser.' : 'Pense nos objetivos que você está trabalhando na terapia.'}
-          </p>
+          {ehAtual ? (
+            <p className="mt-2 text-textoSecundario">
+              Semana iniciada em {dia}/{mes}/{ano}.{' '}
+              {jaExistia ? 'Você já respondeu — pode ajustar se quiser.' : 'Pense nos objetivos que você está trabalhando na terapia.'}
+            </p>
+          ) : (
+            <p className="mt-2 rounded-xl bg-nevoa px-4 py-3 text-sm text-petroleo">
+              Editando a reflexão da <strong>semana de {dia}/{mes}/{ano}</strong>.{' '}
+              <button type="button" onClick={() => editarSemana(semanaAtual)} className="font-semibold underline">
+                Voltar para esta semana
+              </button>
+            </p>
+          )}
         </div>
 
         <Campo
@@ -142,7 +172,7 @@ export default function ReflexaoSemanal() {
 
         {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
         <Botao type="submit" className="w-full" disabled={enviando}>
-          {enviando ? 'Salvando…' : 'Salvar reflexão'}
+          {enviando ? 'Salvando…' : ehAtual ? 'Salvar reflexão' : 'Salvar alterações'}
         </Botao>
       </form>
 
@@ -151,7 +181,7 @@ export default function ReflexaoSemanal() {
         campoData="semanaInicio"
         convite="Escolha uma semana"
         formatarOpcao={(iso) => `Semana de ${formatarDia(iso, { day: '2-digit', month: '2-digit', year: 'numeric' })}`}
-        renderItem={(r) => <CartaoReflexao r={r} />}
+        renderItem={(r) => <CartaoReflexao r={r} onEditar={editarSemana} />}
       />
     </div>
   )

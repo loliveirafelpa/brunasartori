@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Heart } from 'lucide-react'
+import { Heart, Pencil } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { buscarCheckinDoDia, hojeLocal, listarCheckins, salvarCheckin } from '../../lib/checkinsApi'
-import { diasDoPeriodo, rotuloEmocao, rotuloSituacao } from '../../lib/sintese'
+import { diasDoPeriodo, formatarDia, rotuloEmocao, rotuloSituacao } from '../../lib/sintese'
 import { EMOCOES, ESCALA_ENERGIA, ESCALA_SONO, HUMORES, SITUACOES } from '../../data/checkinOpcoes'
 import EscolhaUnica from '../../components/EscolhaUnica'
 import BarraEscala from '../../components/BarraEscala'
@@ -29,7 +29,7 @@ const VAZIO = {
   situacaoOutra: '',
 }
 
-function CartaoCheckin({ c }) {
+function CartaoCheckin({ c, onEditar }) {
   const humor = HUMORES.find((h) => h.valor === c.humor)
   const situacoes = c.situacoes.map((s) => (s === 'outra' && c.situacaoOutra ? c.situacaoOutra : rotuloSituacao(s))).join(', ')
   return (
@@ -46,13 +46,18 @@ function CartaoCheckin({ c }) {
       )}
       {c.energia && <Linha rotulo="Energia">{ESCALA_ENERGIA[c.energia - 1]}</Linha>}
       {c.acontecimento && <Linha rotulo="Acontecimento">{c.acontecimento}</Linha>}
+      <Botao variante="secundario" className="mt-2" onClick={() => onEditar(c.data)}>
+        <Pencil size={14} aria-hidden /> Editar este dia
+      </Botao>
     </>
   )
 }
 
 export default function CheckinDiario() {
   const { usuario } = useAuth()
-  const data = hojeLocal()
+  const hoje = hojeLocal()
+  const [data, setData] = useState(hoje) // dia sendo preenchido: hoje ou um dia anterior em edição
+  const ehHoje = data === hoje
   const [form, setForm] = useState(VAZIO)
   const [jaExistia, setJaExistia] = useState(false)
   const [salvo, setSalvo] = useState(false)
@@ -62,11 +67,13 @@ export default function CheckinDiario() {
 
   useEffect(() => {
     listarCheckins(usuario.id, diasDoPeriodo(60)[0])
-      .then((cs) => setAnteriores(cs.filter((c) => c.data !== data)))
+      .then((cs) => setAnteriores(cs.filter((c) => c.data !== hoje)))
       .catch(() => {})
-  }, [usuario.id, data])
+  }, [usuario.id, hoje])
 
   useEffect(() => {
+    setForm(VAZIO)
+    setJaExistia(false)
     buscarCheckinDoDia(usuario.id, data)
       .then((c) => {
         if (!c) return
@@ -91,12 +98,13 @@ export default function CheckinDiario() {
     if (!form.humor || !form.emocao) return setErro('Responda pelo menos como você está e a emoção mais presente.')
     setEnviando(true)
     try {
-      await salvarCheckin({
+      const salvoAgora = await salvarCheckin({
         ...form,
         userId: usuario.id,
         data,
         sonoHoras: form.sonoHoras === '' ? null : Number(form.sonoHoras),
       })
+      if (!ehHoje) setAnteriores((cs) => cs.map((c) => (c.data === data ? salvoAgora : c)))
       setSalvo(true)
     } catch {
       setErro('Não foi possível salvar agora. Suas respostas continuam aqui — tente de novo em instantes.')
@@ -105,19 +113,34 @@ export default function CheckinDiario() {
     }
   }
 
+  function editarDia(dia) {
+    setData(dia)
+    setSalvo(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const diaPorExtenso = formatarDia(data, { weekday: 'long', day: '2-digit', month: '2-digit' })
+
   if (salvo) {
     const humorBaixo = form.humor <= 2
     return (
       <section className="mx-auto max-w-xl space-y-6 text-center">
         <Heart className="mx-auto text-verdeAgua" size={40} aria-hidden />
-        <h1 className="text-3xl">Obrigada por registrar.</h1>
+        <h1 className="text-3xl">{ehHoje ? 'Obrigada por registrar.' : 'Check-in atualizado.'}</h1>
         <p className="text-textoSecundario">
-          Seu check-in de hoje foi guardado e vai ajudar na sua próxima sessão.
+          {ehHoje
+            ? 'Seu check-in de hoje foi guardado e vai ajudar na sua próxima sessão.'
+            : `As alterações de ${diaPorExtenso} foram guardadas.`}
         </p>
         {humorBaixo && <AvisoCrise destaque />}
-        <Link to="/app" className="inline-block font-interface text-sm font-semibold text-petroleo underline">
-          Voltar para o início
-        </Link>
+        <div className="flex flex-wrap justify-center gap-6">
+          <button type="button" onClick={() => editarDia(hoje)} className="font-interface text-sm font-semibold text-petroleo underline">
+            Ver check-ins
+          </button>
+          <Link to="/app" className="font-interface text-sm font-semibold text-petroleo underline">
+            Voltar para o início
+          </Link>
+        </div>
       </section>
     )
   }
@@ -129,9 +152,18 @@ export default function CheckinDiario() {
           <h1 className="text-3xl">
             Como foi o seu <em className="text-salvia">dia</em>?
           </h1>
-          <p className="mt-2 text-textoSecundario">
-            {jaExistia ? 'Você já registrou hoje — pode ajustar se quiser.' : 'Leva menos de um minuto. Responda só o que fizer sentido.'}
-          </p>
+          {ehHoje ? (
+            <p className="mt-2 text-textoSecundario">
+              {jaExistia ? 'Você já registrou hoje — pode ajustar se quiser.' : 'Leva menos de um minuto. Responda só o que fizer sentido.'}
+            </p>
+          ) : (
+            <p className="mt-2 rounded-xl bg-nevoa px-4 py-3 text-sm text-petroleo">
+              Editando o check-in de <strong className="capitalize">{diaPorExtenso}</strong>.{' '}
+              <button type="button" onClick={() => editarDia(hoje)} className="font-semibold underline">
+                Voltar para hoje
+              </button>
+            </p>
+          )}
         </div>
 
         <EscolhaUnica nome="humor" legenda="Como você está se sentindo?" opcoes={HUMORES} valor={form.humor} onChange={muda('humor')} />
@@ -185,11 +217,11 @@ export default function CheckinDiario() {
 
         {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
         <Botao type="submit" className="w-full" disabled={enviando}>
-          {enviando ? 'Salvando…' : 'Salvar check-in'}
+          {enviando ? 'Salvando…' : ehHoje ? 'Salvar check-in' : 'Salvar alterações'}
         </Botao>
       </form>
 
-      <SeletorDeDia itens={anteriores} renderItem={(c) => <CartaoCheckin c={c} />} />
+      <SeletorDeDia itens={anteriores} renderItem={(c) => <CartaoCheckin c={c} onEditar={editarDia} />} />
     </div>
   )
 }

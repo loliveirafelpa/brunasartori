@@ -43,6 +43,23 @@ export async function criarRegistroPensamento(r) {
   return deBanco(data)
 }
 
+export async function atualizarRegistroPensamento(id, r) {
+  const { data, error } = await supabase
+    .from('registros_pensamento')
+    .update({
+      situacao: r.situacao.trim(),
+      pensamento: r.pensamento.trim(),
+      emocao: r.emocao.trim(),
+      intensidade: r.intensidade,
+      comportamento: r.comportamento?.trim() || null,
+    })
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return deBanco(data)
+}
+
 export async function apagarRegistroPensamento(id) {
   const { error } = await supabase.from('registros_pensamento').delete().eq('id', id)
   if (error) throw error
