@@ -196,7 +196,7 @@ export default function Paciente() {
         {precisaDosRegistros && !sintese ? (
           <p className="text-textoSecundario">Carregando registros…</p>
         ) : aba === 'resumo' ? (
-          <ResumoPaciente sintese={sintese} periodo={periodo} />
+          <ResumoPaciente userId={id} sintese={sintese} periodo={periodo} desde={dias[0]} />
         ) : aba === 'linha' ? (
           <LinhaDoTempo dias={dias} checkins={sintese.checkinsDoPeriodo} />
         ) : aba === 'pensamentos' ? (

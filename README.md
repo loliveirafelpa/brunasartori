@@ -34,6 +34,7 @@ Projeto Supabase `bruna-sartori-checkin` (ref `qjkauulkxmezcuzondzj`, região S�
 | `objetivos_semana` | objetivo combinado na sessão para cada semana — Admin grava, paciente lê |
 | `anotacoes_clinicas` | diário clínico da psicóloga sobre o paciente — só a Admin |
 | `medicacoes` | medicações (nome, dose, como toma, prescritor, início/fim, observações) — só a Admin |
+| `comentarios_resumo` | anotações da psicóloga em cada tópico do Resumo (síntese e temas), com data — só a Admin |
 
 **Regras garantidas no banco (RLS):**
 - Paciente só vê e altera os próprios registros; a Admin lê todos mas não edita registros de pacientes.
