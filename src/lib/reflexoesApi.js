@@ -32,6 +32,17 @@ export async function buscarReflexaoDaSemana(userId, semanaInicio) {
   return data[0] ? deBanco(data[0]) : null
 }
 
+export async function listarReflexoes(userId, limite = 4) {
+  const { data, error } = await supabase
+    .from('reflexoes_semanais')
+    .select('*')
+    .eq('user_id', userId)
+    .order('semana_inicio', { ascending: false })
+    .limit(limite)
+  if (error) throw error
+  return data.map(deBanco)
+}
+
 // Uma reflexão por semana: se já existir, atualiza.
 export async function salvarReflexao(r) {
   const { data, error } = await supabase

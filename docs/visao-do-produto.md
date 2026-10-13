@@ -55,4 +55,5 @@ Baseada no logo e nos posts do Instagram @bru_psico (arquivo `Imagens.pptx`). To
 Feito: banco no Supabase (São Paulo) com todas as tabelas e regras de segurança testadas; telas de login, criar senha, consentimento LGPD e check-in diário; lista de pacientes para a Bruna. Código no GitHub.
 Também feito: telas de reflexão semanal e de registro de pensamentos; pergunta opcional de "situações ligadas ao que sentiu" (gatilhos) dentro do check-in diário. Contas de teste criadas (Admin e paciente).
 Hábitos e comportamentos ficam para depois de conversar com a Bruna, para não tornar o app quantitativo demais.
-Próximo: publicar no Vercel, convite de pacientes, painel da Bruna com síntese de 7 dias.
+Painel da Bruna pronto: indicadores do período (7, 14 ou 30 dias), síntese descritiva, possíveis temas para a sessão, linha do tempo dia a dia, registros de pensamento e reflexões. A Bruna liga/desliga o registro de pensamentos por paciente. Paciente de teste tem 5 dias simulados (08 a 12/10).
+Próximo: publicar no Vercel, convite de pacientes pelo app, privacidade (exportar/apagar dados).

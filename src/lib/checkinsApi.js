@@ -65,6 +65,17 @@ export async function salvarCheckin(checkin) {
   return deBanco(data)
 }
 
+// Para o painel da Admin: check-ins de todos os pacientes desde uma data (RLS limita à Admin).
+export async function listarCheckinsDeTodos(desde) {
+  const { data, error } = await supabase
+    .from('checkins')
+    .select('user_id, data, humor, ansiedade')
+    .gte('data', desde)
+    .order('data', { ascending: false })
+  if (error) throw error
+  return data.map((l) => ({ userId: l.user_id, data: l.data, humor: l.humor, ansiedade: l.ansiedade }))
+}
+
 export async function listarCheckins(userId, desde) {
   const { data, error } = await supabase
     .from('checkins')

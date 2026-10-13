@@ -50,11 +50,11 @@ GitHub (`loliveirafelpa/brunasartori`) conectado ao Vercel; cada push na `main` 
 - Check-in diário completo (Nível 1) com situações associadas (gatilhos, opcional) e aviso de crise.
 - Reflexão semanal sobre objetivos (`/app/semana`).
 - Registro de pensamentos (`/app/pensamentos`), visível só se o módulo estiver ativo para o paciente.
-- Lista de pacientes para a Admin.
+- Painel da Admin: lista de pacientes com adesão dos últimos 7 dias; página de cada paciente (`/app/admin/pacientes/:id`) com indicadores, síntese descritiva, temas sugeridos para a sessão, linha do tempo, registros de pensamento e reflexões; período de 7/14/30 dias; liga/desliga o registro de pensamentos.
+- A síntese é gerada por regras fixas em `src/lib/sintese.js` (sem IA): só descreve contagens e coincidências, nunca afirma causa.
 
 ## Falta
 - Edge Function de convite de paciente (Admin) e desligar cadastro aberto no Supabase Auth.
-- Painel da Admin: síntese de 7 dias, linha do tempo, temas sugeridos, ver registros de pensamento e reflexões, ligar/desligar módulo TCC por paciente.
 - Hábitos e comportamentos (Nível 2) — aguardando conversa com a Bruna.
 - Política de privacidade, exportar/apagar dados, revogar consentimento.
 - Retenção de dados automática (aguardando prazo definido pela Bruna).

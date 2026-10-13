@@ -13,13 +13,15 @@ function deBanco(l) {
   }
 }
 
-export async function listarRegistrosPensamento(userId) {
-  const { data, error } = await supabase
+export async function listarRegistrosPensamento(userId, desde = null) {
+  let consulta = supabase
     .from('registros_pensamento')
     .select('*')
     .eq('user_id', userId)
     .order('ocorrido_em', { ascending: false })
     .limit(50)
+  if (desde) consulta = consulta.gte('ocorrido_em', desde)
+  const { data, error } = await consulta
   if (error) throw error
   return data.map(deBanco)
 }

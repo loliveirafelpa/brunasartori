@@ -28,6 +28,18 @@ export async function listarPacientes() {
   return data.map(deBanco)
 }
 
+export async function buscarPerfil(id) {
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', id).single()
+  if (error) throw error
+  return deBanco(data)
+}
+
+// Só a Admin consegue alterar (garantido por gatilho no banco).
+export async function definirRegistroPensamentos(id, ativo) {
+  const { error } = await supabase.from('profiles').update({ registro_pensamentos_ativo: ativo }).eq('id', id)
+  if (error) throw error
+}
+
 export async function atualizarMeuNome(userId, nome) {
   const { error } = await supabase.from('profiles').update({ nome }).eq('id', userId)
   if (error) throw error

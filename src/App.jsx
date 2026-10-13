@@ -9,6 +9,7 @@ import CheckinDiario from './pages/app/CheckinDiario'
 import ReflexaoSemanal from './pages/app/ReflexaoSemanal'
 import RegistroPensamentos from './pages/app/RegistroPensamentos'
 import Pacientes from './pages/app/admin/Pacientes'
+import Paciente from './pages/app/admin/Paciente'
 
 // A checagem de verdade é o RLS no banco; isto só organiza a navegação.
 function SomenteAdmin({ children }) {
@@ -34,7 +35,8 @@ export default function App() {
             <Route path="checkin" element={<SomentePaciente><CheckinDiario /></SomentePaciente>} />
             <Route path="semana" element={<SomentePaciente><ReflexaoSemanal /></SomentePaciente>} />
             <Route path="pensamentos" element={<SomentePaciente><RegistroPensamentos /></SomentePaciente>} />
-            <Route path="admin"element={<SomenteAdmin><Pacientes /></SomenteAdmin>} />
+            <Route path="admin" element={<SomenteAdmin><Pacientes /></SomenteAdmin>} />
+            <Route path="admin/pacientes/:id" element={<SomenteAdmin><Paciente /></SomenteAdmin>} />
           </Route>
           <Route path="*" element={<Navigate to="/app" replace />} />
         </Routes>
