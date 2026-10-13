@@ -34,6 +34,7 @@ Projeto Supabase `bruna-sartori-checkin` (ref `qjkauulkxmezcuzondzj`, região S�
 | `objetivos_semana` | objetivo combinado na sessão para cada semana — Admin grava, paciente lê |
 | `anotacoes_clinicas` | diário clínico da psicóloga sobre o paciente — só a Admin |
 | `medicacoes` | medicações (nome, dose, como toma, prescritor, início/fim, observações) — só a Admin |
+| `solicitacoes_privacidade` | pedidos do paciente sobre os próprios dados (hoje: encerrar conta) — paciente cria e vê os seus; Admin vê todos e marca resolvido |
 | `comentarios_resumo` | anotações da psicóloga em cada tópico do Resumo (síntese e temas), com data — só a Admin |
 
 **Regras garantidas no banco (RLS):**
@@ -62,10 +63,15 @@ GitHub (`loliveirafelpa/brunasartori`) conectado ao Vercel; cada push na `main` 
 - Painel da Admin: lista de pacientes com adesão dos últimos 7 dias; página de cada paciente (`/app/admin/pacientes/:id`) com indicadores, síntese descritiva, temas sugeridos para a sessão, linha do tempo, registros de pensamento e reflexões; período de 7/14/30 dias; liga/desliga o registro de pensamentos.
 - A síntese é gerada por regras fixas em `src/lib/sintese.js` (sem IA): só descreve contagens e coincidências, nunca afirma causa.
 
+## Privacidade (LGPD)
+- `/privacidade`: política em linguagem simples (`src/data/politicaPrivacidade.js`; trechos marcados VALIDAR dependem da psicóloga).
+- `/app/meus-dados`: baixar os dados (JSON), revogar consentimento (bloqueia novos registros no banco), apagar os próprios registros (check-ins, reflexões, pensamentos) e pedir encerramento da conta.
+- Registros profissionais da psicóloga (ficha, anotações, medicações) não são apagados pelo paciente: guarda mínima exigida pelo CFP. O encerramento da conta é feito pela psicóloga a partir do pedido, que aparece no topo da lista de pacientes.
+
 ## Falta
+- Excluir a conta de um paciente pelo painel (hoje é manual, no Supabase), respeitando a guarda dos registros profissionais.
 - Desligar cadastro aberto no Supabase Auth (painel → Authentication).
 - Convite por e-mail (exige SMTP próprio, ex.: Resend) — hoje é senha provisória enviada pela psicóloga.
 - Hábitos e comportamentos (Nível 2) — aguardando conversa com a Bruna.
-- Política de privacidade, exportar/apagar dados, revogar consentimento.
 - Retenção de dados automática (aguardando prazo definido pela Bruna).
 - Lembrete diário.

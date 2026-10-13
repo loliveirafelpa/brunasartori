@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './lib/AuthContext'
 import AppShell from './AppShell'
 import Login from './pages/Login'
 import DefinirSenha from './pages/DefinirSenha'
+import Privacidade from './pages/Privacidade'
+import MeusDados from './pages/app/MeusDados'
 import Consentimento from './pages/app/Consentimento'
 import Inicio from './pages/app/Inicio'
 import CheckinDiario from './pages/app/CheckinDiario'
@@ -30,12 +32,14 @@ export default function App() {
         <Routes>
           <Route path="/entrar" element={<Login />} />
           <Route path="/definir-senha" element={<DefinirSenha />} />
+          <Route path="/privacidade" element={<Privacidade />} />
           <Route path="/app" element={<AppShell />}>
             <Route index element={<SomentePaciente><Inicio /></SomentePaciente>} />
             <Route path="consentimento" element={<SomentePaciente><Consentimento /></SomentePaciente>} />
             <Route path="checkin" element={<SomentePaciente><CheckinDiario /></SomentePaciente>} />
             <Route path="semana" element={<SomentePaciente><ReflexaoSemanal /></SomentePaciente>} />
             <Route path="pensamentos" element={<SomentePaciente><RegistroPensamentos /></SomentePaciente>} />
+            <Route path="meus-dados" element={<SomentePaciente><MeusDados /></SomentePaciente>} />
             <Route path="admin" element={<SomenteAdmin><Pacientes /></SomenteAdmin>} />
             <Route path="admin/pacientes/novo" element={<SomenteAdmin><NovoPaciente /></SomenteAdmin>} />
             <Route path="admin/pacientes/:id" element={<SomenteAdmin><Paciente /></SomenteAdmin>} />

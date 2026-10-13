@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ShieldCheck } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { registrarConsentimentos } from '../../lib/consentimentosApi'
@@ -55,7 +55,13 @@ export default function Consentimento() {
         <div className="space-y-3">
           <label className="flex cursor-pointer gap-3 rounded-2xl bg-papel p-4 text-sm leading-relaxed">
             <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 accent-petroleo" checked={termos} onChange={(e) => setTermos(e.target.checked)} />
-            <span>Li e aceito os termos de uso e a política de privacidade.</span>
+            <span>
+              Li e aceito os termos de uso e a{' '}
+              <Link to="/privacidade" target="_blank" className="font-semibold text-petroleo underline">
+                política de privacidade
+              </Link>
+              .
+            </span>
           </label>
 
           <label className="flex cursor-pointer gap-3 rounded-2xl border-2 border-salvia bg-branco p-4 text-sm leading-relaxed">

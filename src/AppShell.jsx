@@ -1,5 +1,5 @@
-import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { BrainCircuit, CalendarHeart, House, LogOut, Sprout, Users } from 'lucide-react'
+import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { BrainCircuit, CalendarHeart, House, LogOut, ShieldCheck, Sprout, Users } from 'lucide-react'
 import { useAuth } from './lib/AuthContext'
 import Logo from './components/Logo'
 import AvisoCrise from './components/AvisoCrise'
@@ -17,7 +17,8 @@ export default function AppShell() {
   if (!sessao) return <Navigate to="/entrar" replace />
   // Conta criada pela psicóloga com senha provisória: trocar antes de qualquer coisa.
   if (sessao.user.user_metadata?.trocar_senha) return <Navigate to="/definir-senha" replace />
-  if (!ehAdmin && !consentiu && pathname !== '/app/consentimento') {
+  // Sem consentimento, o paciente ainda pode autorizar de novo ou cuidar dos próprios dados.
+  if (!ehAdmin && !consentiu && !['/app/consentimento', '/app/meus-dados'].includes(pathname)) {
     return <Navigate to="/app/consentimento" replace />
   }
 
@@ -64,9 +65,22 @@ export default function AppShell() {
             ))}
           </nav>
 
-          <button onClick={sair} className="flex items-center gap-1.5 font-interface text-xs font-semibold text-nevoa hover:text-branco">
-            <LogOut size={15} aria-hidden /> Sair
-          </button>
+          <div className="flex items-center gap-4">
+            {!ehAdmin && (
+              <NavLink
+                to="/app/meus-dados"
+                aria-label="Meus dados"
+                className={({ isActive }) =>
+                  `flex items-center gap-1.5 font-interface text-xs font-semibold hover:text-branco ${isActive ? 'text-branco' : 'text-nevoa'}`
+                }
+              >
+                <ShieldCheck size={15} aria-hidden /> <span className="hidden sm:inline">Meus dados</span>
+              </NavLink>
+            )}
+            <button onClick={sair} className="flex items-center gap-1.5 font-interface text-xs font-semibold text-nevoa hover:text-branco">
+              <LogOut size={15} aria-hidden /> Sair
+            </button>
+          </div>
         </div>
       </header>
 
@@ -83,6 +97,11 @@ export default function AppShell() {
       {!ehAdmin && (
         <footer className={`px-4 pb-6 pt-2 ${navBaixo ? 'mb-20 sm:mb-0' : ''}`}>
           <AvisoCrise compacto />
+          <p className="mt-2 text-center text-xs">
+            <Link to="/privacidade" className="text-textoSecundario underline hover:text-petroleo">
+              Política de privacidade
+            </Link>
+          </p>
         </footer>
       )}
 
