@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { Heart } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { buscarCheckinDoDia, hojeLocal, salvarCheckin } from '../../lib/checkinsApi'
-import { EMOCOES, ESCALA_ANSIEDADE, ESCALA_ENERGIA, ESCALA_SONO, HUMORES } from '../../data/checkinOpcoes'
+import { EMOCOES, ESCALA_ANSIEDADE, ESCALA_ENERGIA, ESCALA_SONO, HUMORES, SITUACOES } from '../../data/checkinOpcoes'
 import EscolhaUnica from '../../components/EscolhaUnica'
+import EscolhaMultipla from '../../components/EscolhaMultipla'
 import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
 import AvisoCrise from '../../components/AvisoCrise'
@@ -20,6 +21,8 @@ const VAZIO = {
   sonoQualidade: null,
   energia: null,
   acontecimento: '',
+  situacoes: [],
+  situacaoOutra: '',
 }
 
 export default function CheckinDiario() {
@@ -36,7 +39,14 @@ export default function CheckinDiario() {
       .then((c) => {
         if (!c) return
         setJaExistia(true)
-        setForm({ ...VAZIO, ...c, sonoHoras: c.sonoHoras ?? '', emocaoOutra: c.emocaoOutra ?? '', acontecimento: c.acontecimento ?? '' })
+        setForm({
+          ...VAZIO,
+          ...c,
+          sonoHoras: c.sonoHoras ?? '',
+          emocaoOutra: c.emocaoOutra ?? '',
+          acontecimento: c.acontecimento ?? '',
+          situacaoOutra: c.situacaoOutra ?? '',
+        })
       })
       .catch(() => {})
   }, [usuario.id, data])
@@ -97,6 +107,19 @@ export default function CheckinDiario() {
         <EscolhaUnica nome="emocao" legenda="Qual emoção esteve mais presente?" opcoes={EMOCOES} valor={form.emocao} onChange={muda('emocao')} colunas={4} />
         {form.emocao === 'outra' && (
           <Campo rotulo="Qual?" id="emocao-outra" maxLength={80} value={form.emocaoOutra} onChange={(e) => muda('emocaoOutra')(e.target.value)} />
+        )}
+      </div>
+
+      <div className="space-y-3">
+        <EscolhaMultipla
+          legenda="Alguma situação esteve ligada ao que você sentiu?"
+          ajuda="Opcional. Marque quantas quiser."
+          opcoes={SITUACOES}
+          valores={form.situacoes}
+          onChange={muda('situacoes')}
+        />
+        {form.situacoes.includes('outra') && (
+          <Campo rotulo="Qual situação?" id="situacao-outra" maxLength={80} value={form.situacaoOutra} onChange={(e) => muda('situacaoOutra')(e.target.value)} />
         )}
       </div>
 

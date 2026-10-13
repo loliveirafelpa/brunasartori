@@ -16,6 +16,21 @@ export const EMOCOES = [
   { valor: 'outra', rotulo: 'Outra' },
 ]
 
+// Situações que o paciente associa ao que sentiu — percepção dele, não causa.
+export const SITUACOES = [
+  { valor: 'trabalho', rotulo: 'Trabalho' },
+  { valor: 'familia', rotulo: 'Família' },
+  { valor: 'relacionamento', rotulo: 'Relacionamento' },
+  { valor: 'vida_social', rotulo: 'Vida social' },
+  { valor: 'financas', rotulo: 'Finanças' },
+  { valor: 'saude', rotulo: 'Saúde' },
+  { valor: 'estudos', rotulo: 'Estudos' },
+  { valor: 'solidao', rotulo: 'Solidão' },
+  { valor: 'sobrecarga', rotulo: 'Sobrecarga' },
+  { valor: 'mudanca_rotina', rotulo: 'Mudança na rotina' },
+  { valor: 'outra', rotulo: 'Outra' },
+]
+
 export const ESCALA_ANSIEDADE = ['Nenhuma', 'Leve', 'Moderada', 'Alta', 'Muito alta']
 export const ESCALA_SONO = ['Muito ruim', 'Ruim', 'Regular', 'Bom', 'Muito bom']
 export const ESCALA_ENERGIA = ['Muito baixa', 'Baixa', 'Média', 'Boa', 'Muito boa']

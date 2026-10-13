@@ -53,4 +53,6 @@ Baseada no logo e nos posts do Instagram @bru_psico (arquivo `Imagens.pptx`). To
 ## Estado atual
 13/10/2026 — Decidido: lançamento inclui Nível 1 + registro de pensamentos (TCC); paciente entra só por convite da Bruna.
 Feito: banco no Supabase (São Paulo) com todas as tabelas e regras de segurança testadas; telas de login, criar senha, consentimento LGPD e check-in diário; lista de pacientes para a Bruna. Código no GitHub.
-Próximo: publicar no Vercel, convite de pacientes, painel de síntese de 7 dias.
+Também feito: telas de reflexão semanal e de registro de pensamentos; pergunta opcional de "situações ligadas ao que sentiu" (gatilhos) dentro do check-in diário. Contas de teste criadas (Admin e paciente).
+Hábitos e comportamentos ficam para depois de conversar com a Bruna, para não tornar o app quantitativo demais.
+Próximo: publicar no Vercel, convite de pacientes, painel da Bruna com síntese de 7 dias.

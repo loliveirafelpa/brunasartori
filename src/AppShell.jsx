@@ -26,13 +26,17 @@ export default function AppShell() {
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-3">
             <Logo tamanho={40} />
-            <nav className="flex gap-4">
+            <nav className="flex flex-wrap gap-x-4 gap-y-1">
               {ehAdmin ? (
                 <NavLink to="/app/admin" className={linkClasse}>Pacientes</NavLink>
               ) : (
                 <>
                   <NavLink to="/app" end className={linkClasse}>Início</NavLink>
                   <NavLink to="/app/checkin" className={linkClasse}>Check-in</NavLink>
+                  <NavLink to="/app/semana" className={linkClasse}>Semana</NavLink>
+                  {perfil.registroPensamentosAtivo && (
+                    <NavLink to="/app/pensamentos" className={linkClasse}>Pensamentos</NavLink>
+                  )}
                 </>
               )}
             </nav>

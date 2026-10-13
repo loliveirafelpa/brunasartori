@@ -26,7 +26,7 @@ Projeto Supabase `bruna-sartori-checkin` (ref `qjkauulkxmezcuzondzj`, região S�
 |---|---|
 | `profiles` | papel (`admin`/`paciente`), nome, módulo de registro de pensamentos ativo, data de encerramento |
 | `consentimentos` | aceites de termos e de dado de saúde, com versão, data/hora e revogação |
-| `checkins` | um por paciente por dia: humor, emoção, ansiedade, sono, energia, acontecimento |
+| `checkins` | um por paciente por dia: humor, emoção, situações associadas, ansiedade, sono, energia, acontecimento |
 | `reflexoes_semanais` | percepção semanal sobre objetivos terapêuticos |
 | `registros_pensamento` | situação → pensamento → emoção → intensidade → comportamento (TCC) |
 
@@ -47,13 +47,15 @@ GitHub (`loliveirafelpa/brunasartori`) conectado ao Vercel; cada push na `main` 
 
 ## Pronto
 - Login, definição de senha (convite/recuperação), consentimento LGPD em dois checkboxes gravados no banco.
-- Check-in diário completo (Nível 1) com aviso de crise.
+- Check-in diário completo (Nível 1) com situações associadas (gatilhos, opcional) e aviso de crise.
+- Reflexão semanal sobre objetivos (`/app/semana`).
+- Registro de pensamentos (`/app/pensamentos`), visível só se o módulo estiver ativo para o paciente.
 - Lista de pacientes para a Admin.
 
 ## Falta
 - Edge Function de convite de paciente (Admin) e desligar cadastro aberto no Supabase Auth.
-- Painel da Admin: síntese de 7 dias, linha do tempo, temas sugeridos.
-- Reflexão semanal e registro de pensamentos (telas).
+- Painel da Admin: síntese de 7 dias, linha do tempo, temas sugeridos, ver registros de pensamento e reflexões, ligar/desligar módulo TCC por paciente.
+- Hábitos e comportamentos (Nível 2) — aguardando conversa com a Bruna.
 - Política de privacidade, exportar/apagar dados, revogar consentimento.
 - Retenção de dados automática (aguardando prazo definido pela Bruna).
 - Lembrete diário.

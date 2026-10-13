@@ -13,6 +13,8 @@ function deBanco(l) {
     sonoQualidade: l.sono_qualidade,
     energia: l.energia,
     acontecimento: l.acontecimento,
+    situacoes: l.situacoes ?? [],
+    situacaoOutra: l.situacao_outra,
     createdAt: l.created_at,
   }
 }
@@ -29,6 +31,8 @@ function paraBanco(c) {
     sono_qualidade: c.sonoQualidade,
     energia: c.energia,
     acontecimento: c.acontecimento?.trim() || null,
+    situacoes: c.situacoes ?? [],
+    situacao_outra: c.situacoes?.includes('outra') ? c.situacaoOutra?.trim() || null : null,
   }
 }
 
