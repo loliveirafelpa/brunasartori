@@ -18,8 +18,8 @@ const PERIODOS = [7, 14, 30]
 const ABAS = [
   { id: 'resumo', rotulo: 'Resumo', usaPeriodo: true },
   { id: 'linha', rotulo: 'Linha do tempo', usaPeriodo: true },
-  { id: 'pensamentos', rotulo: 'Pensamentos', usaPeriodo: true },
   { id: 'reflexoes', rotulo: 'Semana' },
+  { id: 'pensamentos', rotulo: 'Pensamentos', usaPeriodo: true },
   { id: 'ficha', rotulo: 'Ficha e objetivos' },
   { id: 'anotacoes', rotulo: 'Anotações clínicas', restrita: true },
 ]
