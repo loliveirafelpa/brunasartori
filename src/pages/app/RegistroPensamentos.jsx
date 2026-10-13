@@ -8,7 +8,8 @@ import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
 import RegistrosAnteriores, { Linha } from '../../components/RegistrosAnteriores'
 
-const VAZIO = { situacao: '', pensamento: '', emocao: '', intensidade: 5, comportamento: '' }
+const OUTRA = 'Outra'
+const VAZIO = { situacao: '', pensamento: '', emocao: '', emocaoOutra: '', intensidade: 5, comportamento: '' }
 
 function Formulario({ userId, onSalvo }) {
   const [form, setForm] = useState(VAZIO)
@@ -19,12 +20,13 @@ function Formulario({ userId, onSalvo }) {
   async function salvar(e) {
     e.preventDefault()
     setErro('')
-    if (!form.situacao.trim() || !form.pensamento.trim() || !form.emocao.trim()) {
-      return setErro('Preencha o que aconteceu, o pensamento e a emoção.')
+    const emocao = form.emocao === OUTRA ? form.emocaoOutra.trim() : form.emocao
+    if (!form.situacao.trim() || !form.pensamento.trim() || !emocao) {
+      return setErro('Preencha a situação, o pensamento e a emoção.')
     }
     setEnviando(true)
     try {
-      const novo = await criarRegistroPensamento({ ...form, userId, intensidade: Number(form.intensidade) })
+      const novo = await criarRegistroPensamento({ ...form, emocao, userId, intensidade: Number(form.intensidade) })
       setForm(VAZIO)
       onSalvo(novo)
     } catch {
@@ -39,18 +41,17 @@ function Formulario({ userId, onSalvo }) {
       <Campo id="situacao" multilinha maxLength={2000} required rotulo={PASSOS_REGISTRO.situacao.rotulo} ajuda={PASSOS_REGISTRO.situacao.ajuda} value={form.situacao} onChange={muda('situacao')} />
       <Campo id="pensamento" multilinha maxLength={2000} required rotulo={PASSOS_REGISTRO.pensamento.rotulo} ajuda={PASSOS_REGISTRO.pensamento.ajuda} value={form.pensamento} onChange={muda('pensamento')} />
 
-      <div>
-        <Campo id="emocao" maxLength={80} required list="emocoes-sugeridas" rotulo={PASSOS_REGISTRO.emocao.rotulo} ajuda={PASSOS_REGISTRO.emocao.ajuda} value={form.emocao} onChange={muda('emocao')} />
-        <datalist id="emocoes-sugeridas">
-          {EMOCOES_SUGERIDAS.map((e) => <option key={e} value={e} />)}
-        </datalist>
+      <fieldset>
+        <legend className="font-interface text-sm font-semibold text-texto">{PASSOS_REGISTRO.emocao.rotulo}</legend>
+        <p className="mt-1 text-xs text-textoSecundario">{PASSOS_REGISTRO.emocao.ajuda}</p>
         <div className="mt-2 flex flex-wrap gap-2">
-          {EMOCOES_SUGERIDAS.map((e) => (
+          {[...EMOCOES_SUGERIDAS, OUTRA].map((e) => (
             <button
               key={e}
               type="button"
+              aria-pressed={form.emocao === e}
               onClick={() => setForm((f) => ({ ...f, emocao: e }))}
-              className={`rounded-full border px-3 py-1 font-interface text-xs ${
+              className={`rounded-full border px-3 py-1.5 font-interface text-xs ${
                 form.emocao === e ? 'border-salvia bg-salvia text-branco' : 'border-borda text-texto hover:border-salvia'
               }`}
             >
@@ -58,7 +59,12 @@ function Formulario({ userId, onSalvo }) {
             </button>
           ))}
         </div>
-      </div>
+        {form.emocao === OUTRA && (
+          <div className="mt-3">
+            <Campo id="emocao-outra" rotulo="Qual emoção?" maxLength={80} required value={form.emocaoOutra} onChange={muda('emocaoOutra')} />
+          </div>
+        )}
+      </fieldset>
 
       <div>
         <label htmlFor="intensidade" className="font-interface text-sm font-semibold text-texto">

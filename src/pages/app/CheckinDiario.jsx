@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Heart } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { buscarCheckinDoDia, hojeLocal, listarCheckins, salvarCheckin } from '../../lib/checkinsApi'
-import { diasDoPeriodo, formatarDia, rotuloEmocao, rotuloSituacao } from '../../lib/sintese'
+import { diasDoPeriodo, rotuloEmocao, rotuloSituacao } from '../../lib/sintese'
 import { EMOCOES, ESCALA_ENERGIA, ESCALA_SONO, HUMORES, SITUACOES } from '../../data/checkinOpcoes'
 import EscolhaUnica from '../../components/EscolhaUnica'
 import BarraEscala from '../../components/BarraEscala'
@@ -11,7 +11,8 @@ import EscolhaMultipla from '../../components/EscolhaMultipla'
 import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
 import AvisoCrise from '../../components/AvisoCrise'
-import RegistrosAnteriores, { Linha } from '../../components/RegistrosAnteriores'
+import { Linha } from '../../components/RegistrosAnteriores'
+import SeletorDeDia from '../../components/SeletorDeDia'
 
 const escala = (rotulos) => rotulos.map((rotulo, i) => ({ valor: i + 1, rotulo }))
 
@@ -33,9 +34,6 @@ function CartaoCheckin({ c }) {
   const situacoes = c.situacoes.map((s) => (s === 'outra' && c.situacaoOutra ? c.situacaoOutra : rotuloSituacao(s))).join(', ')
   return (
     <>
-      <p className="font-interface text-xs font-semibold capitalize text-textoSecundario">
-        {formatarDia(c.data, { weekday: 'long', day: '2-digit', month: '2-digit' })}
-      </p>
       <Linha rotulo="Humor">{humor.emoji} {humor.rotulo}</Linha>
       <Linha rotulo="Emoção">{rotuloEmocao(c)}</Linha>
       {situacoes && <Linha rotulo="Situações">{situacoes}</Linha>}
@@ -191,7 +189,7 @@ export default function CheckinDiario() {
         </Botao>
       </form>
 
-      <RegistrosAnteriores itens={anteriores} chave={(c) => c.data} renderItem={(c) => <CartaoCheckin c={c} />} />
+      <SeletorDeDia itens={anteriores} renderItem={(c) => <CartaoCheckin c={c} />} />
     </div>
   )
 }
