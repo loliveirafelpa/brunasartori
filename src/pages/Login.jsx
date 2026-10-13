@@ -40,7 +40,11 @@ export default function Login() {
     <LayoutAcesso
       titulo={
         <>
-          Seu espaço <Destaque>entre as sessões</Destaque>
+          Seu espaço
+          <br />
+          <span className="whitespace-nowrap">
+            <Destaque>entre as sessões</Destaque>
+          </span>
         </>
       }
     >
