@@ -60,12 +60,18 @@ Projeto Supabase `bruna-sartori-checkin` (ref `qjkauulkxmezcuzondzj`, região S�
 
 **Edge Function `criar-paciente`**: só a Admin chama. Cria a conta com senha provisória (`user_metadata.trocar_senha = true`), perfil, ficha e objetivos; se algo falhar, apaga a conta criada.
 
-**Tornar uma conta Admin** (SQL Editor do Supabase):
+**Tornar uma conta Admin**: criar o usuário em Authentication → Users → Add user → Create new user (e-mail, senha provisória, *Auto Confirm User*) — **conferir que é o projeto `qjkauulkxmezcuzondzj`**, já houve conta criada por engano em outro projeto. Depois, no SQL Editor:
 ```sql
-update public.profiles set role = 'admin' where id = (select id from auth.users where email = 'EMAIL_DA_BRUNA');
+update public.profiles set role = 'admin', nome = 'NOME' where id = (select id from auth.users where email = 'EMAIL');
+-- obriga a trocar a senha provisória no primeiro acesso
+update auth.users set raw_user_meta_data = raw_user_meta_data || '{"trocar_senha": true}' where email = 'EMAIL';
 ```
 
-**Contas de teste**: Admin `loliveirafelpa@gmail.com` e paciente `loliveirafelpa+paciente@gmail.com` (dados simulados de 08 a 12/10/2026). Senhas fora do repositório; trocar antes do uso real.
+**Contas**
+- Bruna (Admin real): `bru_sartori@hotmail.com`, criada em 14/10/2026 com senha provisória e troca obrigatória no primeiro acesso.
+- Teste: Admin `loliveirafelpa@gmail.com` e paciente `loliveirafelpa+paciente@gmail.com` (dados simulados de 08 a 12/10/2026). Senhas fora do repositório. A Admin de teste vê dados reais: apagar ou trocar a senha antes do uso real.
+- Definir a senha de uma conta direto no banco (SQL Editor, digitado por quem vai usar a senha — nunca em conversa ou no repositório):
+  `update auth.users set encrypted_password = extensions.crypt('SENHA', extensions.gen_salt('bf')), updated_at = now() where email = 'EMAIL';`
 
 ## Privacidade (LGPD)
 - `/privacidade`: política em linguagem simples (`src/data/politicaPrivacidade.js`; trechos com `VALIDAR` dependem da psicóloga).
@@ -73,12 +79,19 @@ update public.profiles set role = 'admin' where id = (select id from auth.users 
 - Registros profissionais da psicóloga (ficha, anotações, medicações) não são apagados pelo paciente (guarda mínima do CFP). O encerramento da conta é feito pela psicóloga a partir do pedido.
 
 ## Deploy
-GitHub (`loliveirafelpa/brunasartori`) a ser conectado ao Vercel; cada push na `main` publica. Variáveis no Vercel: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. `vercel.json` faz o rewrite da SPA e define cabeçalhos de segurança (CSP libera Google Fonts e `*.supabase.co`).
+Publicado no Vercel desde 14/10/2026, ligado ao GitHub (`loliveirafelpa/brunasartori`): cada push na `main` publica sozinho. `vercel.json` faz o rewrite da SPA e define cabeçalhos de segurança (CSP libera Google Fonts e `*.supabase.co`).
+- **Variáveis** (Settings → Environment Variables, com *Production* marcado): `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` (chave publishable). Nome e valor em campos separados. O Vercel avisa que o prefixo `VITE_` expõe o valor ao navegador — é esperado para essas duas; nunca colocar a service role lá. Sem elas o app abre em branco (`createClient` falha); depois de mudar, fazer Redeploy sem cache.
+- **Supabase → Authentication → URL Configuration**: Site URL = endereço do Vercel; Redirect URLs = `https://<endereço>/**` e `http://localhost:5180/**`. Necessário para o "Esqueci minha senha" (`/definir-senha`).
+- A mensagem de boas-vindas do Novo paciente usa `window.location.origin`: cadastrar pacientes reais pelo site publicado, não pelo localhost.
+- Domínio próprio: Vercel → Settings → Domains, e repetir o endereço na URL Configuration do Supabase.
 
 ## Falta
-- Publicar no Vercel e testar no ar.
 - Desligar o cadastro aberto no Supabase Auth (Authentication → Sign In / Providers).
-- Trocar as senhas das contas de teste.
+- Apagar a Admin de teste ou trocar a senha dela.
+- Conferir a URL Configuration do Supabase com o endereço publicado e testar o "Esqueci minha senha" no ar.
+- Testar no ar a troca de senha da Admin e o encerrar/reabrir acompanhamento (publicados sem teste em navegador).
+- Ligar a proteção contra senhas vazadas (Authentication; único aviso do advisor de segurança).
+- `listarCheckinsDeTodos` (lista de pacientes) está sujeito ao limite de 1.000 linhas do Supabase: paginar ou agregar no banco quando passar de ~140 pacientes ativos.
 - Excluir a conta de um paciente pelo painel (hoje é manual, no Supabase), respeitando a guarda dos registros profissionais.
 - Retenção automática dos dados (aguardando prazo definido pela Bruna).
 - Validar com a Bruna os trechos `VALIDAR` da política.

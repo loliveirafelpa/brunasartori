@@ -29,6 +29,7 @@ O app **organiza informações e sugere temas de conversa — não afirma causas
   - **Anotações clínicas:** diário dela sobre o paciente e registro de medicações (em uso e histórico).
 - Recebe na lista de pacientes os pedidos de encerramento de conta e o aviso de quem revogou o consentimento.
 - Encontra pacientes por nome, vê primeiro quem precisa de atenção (sem consentimento, pedido de encerramento ou sem check-in na semana) e separa os acompanhamentos encerrados, que saem da lista principal sem apagar nada.
+- Troca a própria senha pelo painel (pede a senha atual).
 - Ficha, histórico, anotações, medicações e comentários são **só dela**: o paciente não vê.
 
 ## Cuidados obrigatórios
@@ -45,9 +46,10 @@ Baseada no logo e nos posts do Instagram @bru_psico. Tom acolhedor e validante (
 - Pendente: logo em arquivo vetorial (.svg/.pdf) para máxima nitidez.
 
 ## Estado atual (outubro/2026)
-- Tudo acima está construído e testado no ambiente local; código no GitHub, banco no Supabase (São Paulo).
+- **Publicado no Vercel em 14/10/2026**; cada atualização no GitHub vai para o ar sozinha. Banco no Supabase (São Paulo).
+- Conta da Bruna criada (`bru_sartori@hotmail.com`) com senha provisória; ela cria a própria senha no primeiro acesso. Mensagem com acessos e orientações preparada para envio.
 - Contas de teste: uma Admin e um paciente com 5 dias de registros simulados.
-- **Ainda não está publicado.** Próximos passos: publicar no Vercel, desligar o cadastro aberto no Supabase, trocar senhas de teste.
+- Antes dos pacientes reais: desligar o cadastro aberto no Supabase e apagar (ou trocar a senha da) Admin de teste.
 
 ## Para validar com a Bruna
 - Canal de contato para assuntos de privacidade (hoje: "pelos canais de atendimento").
