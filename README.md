@@ -29,7 +29,7 @@ Se o build reclamar de `@rollup/rollup-win32-x64-msvc`, o binário foi removido 
 - Pensamentos (se ativo para o paciente): situação, pensamento, emoção (botões + "Outra"), intensidade, comportamento. Registros anteriores editáveis/apagáveis.
 - Primeiro acesso: troca da senha provisória → consentimento LGPD (dois checkboxes gravados com data/hora).
 
-**Admin**: lista de pacientes (adesão 7 dias, pedidos de privacidade, sem consentimento) · Novo paciente · página do paciente com abas:
+**Admin**: lista de pacientes (adesão 7 dias, pedidos de privacidade, sem consentimento) · Novo paciente · Alterar senha (`/app/admin/senha`, pede a senha atual; link "Senha" no cabeçalho) · página do paciente com abas:
 Resumo (números, síntese por tópico, temas para a sessão, anotações da psicóloga por tópico) · Linha do tempo · Semana · Pensamentos · Ficha e objetivos (objetivos terapêuticos, combinados por semana com histórico, ficha com histórico) · Anotações clínicas (diário e medicações). Período de 7/14/30 dias.
 
 A síntese (`src/lib/sintese.js`) é feita por regras fixas, sem IA: só descreve contagens e coincidências, nunca afirma causa. Ansiedade alta = 7/10 ou mais.

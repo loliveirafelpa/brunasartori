@@ -1,5 +1,5 @@
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { BrainCircuit, CalendarHeart, House, LogOut, ShieldCheck, Sprout, Users } from 'lucide-react'
+import { BrainCircuit, CalendarHeart, House, KeyRound, LogOut, ShieldCheck, Sprout, Users } from 'lucide-react'
 import { useAuth } from './lib/AuthContext'
 import Logo from './components/Logo'
 import AvisoCrise from './components/AvisoCrise'
@@ -66,6 +66,17 @@ export default function AppShell() {
           </nav>
 
           <div className="flex items-center gap-4">
+            {ehAdmin && (
+              <NavLink
+                to="/app/admin/senha"
+                aria-label="Alterar senha"
+                className={({ isActive }) =>
+                  `flex items-center gap-1.5 font-interface text-xs font-semibold hover:text-branco ${isActive ? 'text-branco' : 'text-nevoa'}`
+                }
+              >
+                <KeyRound size={15} aria-hidden /> <span className="hidden sm:inline">Senha</span>
+              </NavLink>
+            )}
             {!ehAdmin && (
               <NavLink
                 to="/app/meus-dados"
