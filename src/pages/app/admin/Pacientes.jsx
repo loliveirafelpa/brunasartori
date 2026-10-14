@@ -1,10 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BellRing, ChevronRight, UserPlus, Users } from 'lucide-react'
+import { BellRing, ChevronRight, Search, UserPlus, Users } from 'lucide-react'
 import { listarPacientes } from '../../../lib/perfisApi'
 import { listarCheckinsDeTodos } from '../../../lib/checkinsApi'
 import { listarSemConsentimentoVigente, listarSolicitacoesAbertas, marcarSolicitacaoResolvida } from '../../../lib/privacidadeApi'
 import { diasDoPeriodo, formatarDia } from '../../../lib/sintese'
+
+const FILTROS = [
+  { id: 'ativos', rotulo: 'Ativos' },
+  { id: 'atencao', rotulo: 'Precisam de atenção' },
+  { id: 'encerrados', rotulo: 'Encerrados' },
+]
+
+const VAZIO_POR_FILTRO = {
+  ativos: 'Nenhum paciente ativo.',
+  atencao: 'Nenhum paciente precisando de atenção agora.',
+  encerrados: 'Nenhum acompanhamento encerrado. Para encerrar, abra o paciente na aba “Ficha e objetivos”.',
+}
+
+// Busca sem diferenciar maiúsculas nem acentos ("joao" encontra "João").
+const normalizar = (t) =>
+  (t ?? '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
 
 // Pedidos de privacidade em aberto (ex.: encerrar conta), para a psicóloga dar andamento.
 function Pedidos({ pedidos, nomes, onResolver }) {
@@ -43,6 +62,9 @@ export default function Pacientes() {
   const [pedidos, setPedidos] = useState([])
   const [semConsentimento, setSemConsentimento] = useState(new Set())
   const [erro, setErro] = useState('')
+  const [busca, setBusca] = useState('')
+  const [filtro, setFiltro] = useState('ativos')
+  const [ordem, setOrdem] = useState('nome')
 
   useEffect(() => {
     const dias = diasDoPeriodo(7)
@@ -68,6 +90,37 @@ export default function Pacientes() {
 
   const nomes = Object.fromEntries((pacientes ?? []).map((p) => [p.id, p.nome]))
 
+  // Resumo de cada paciente para a lista: check-ins da semana, último registro e o que pede atenção.
+  const linhas = useMemo(
+    () =>
+      (pacientes ?? []).map((p) => {
+        const meus = checkins.filter((c) => c.userId === p.id)
+        const avisos = []
+        if (!p.acompanhamentoEncerradoEm) {
+          if (semConsentimento.has(p.id)) avisos.push('Sem consentimento vigente')
+          if (pedidos.some((x) => x.userId === p.id)) avisos.push('Pediu encerramento')
+          if (meus.length === 0) avisos.push('Sem check-in na semana')
+        }
+        return { ...p, diasComCheckin: meus.length, ultimo: meus[0]?.data ?? null, avisos }
+      }),
+    [pacientes, checkins, semConsentimento, pedidos],
+  )
+
+  const grupos = {
+    ativos: linhas.filter((l) => !l.acompanhamentoEncerradoEm),
+    atencao: linhas.filter((l) => l.avisos.length > 0),
+    encerrados: linhas.filter((l) => l.acompanhamentoEncerradoEm),
+  }
+
+  const termo = normalizar(busca.trim())
+  const visiveis = grupos[filtro]
+    .filter((l) => !termo || normalizar(l.nome).includes(termo))
+    .sort((a, b) =>
+      ordem === 'ultimo'
+        ? (a.ultimo ?? '').localeCompare(b.ultimo ?? '') || a.nome.localeCompare(b.nome, 'pt-BR')
+        : a.nome.localeCompare(b.nome, 'pt-BR'),
+    )
+
   return (
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -88,44 +141,82 @@ export default function Pacientes() {
       {pacientes?.length === 0 && (
         <p className="rounded-2xl bg-branco p-6 text-textoSecundario">Nenhum paciente cadastrado ainda. Use “Novo paciente” para começar.</p>
       )}
-      <ul className="grid gap-3 sm:grid-cols-2">
-        {pacientes?.map((p) => {
-          const meus = checkins.filter((c) => c.userId === p.id)
-          const ultimo = meus[0]
-          const pediuEncerrar = pedidos.some((x) => x.userId === p.id)
-          return (
-            <li key={p.id}>
-              <Link
-                to={`/app/admin/pacientes/${p.id}`}
-                className="flex items-center justify-between gap-3 rounded-2xl bg-branco p-5 shadow-cartao transition-colors hover:bg-nevoa"
+
+      {pacientes?.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="relative min-w-0 flex-1 basis-60">
+              <span className="sr-only">Buscar paciente</span>
+              <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-textoSecundario" aria-hidden />
+              <input
+                type="search"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar paciente…"
+                className="w-full rounded-full border border-borda bg-branco py-2.5 pl-10 pr-4 text-sm placeholder:text-textoSecundario/80 focus:border-petroleo"
+              />
+            </label>
+            <label className="flex items-center gap-2 font-interface text-xs font-semibold text-textoSecundario">
+              Ordenar
+              <select
+                value={ordem}
+                onChange={(e) => setOrdem(e.target.value)}
+                className="rounded-full border border-borda bg-branco px-3 py-2 text-sm font-normal text-texto focus:border-petroleo"
               >
-                <span>
-                  <span className="block font-titulo text-lg text-petroleo">{p.nome || 'Sem nome'}</span>
-                  <span className="block text-sm text-textoSecundario">
-                    {meus.length} de 7 dias com check-in
-                    {ultimo && ` · último: ${formatarDia(ultimo.data, { day: '2-digit', month: '2-digit' })}`}
-                  </span>
-                  {(semConsentimento.has(p.id) || pediuEncerrar) && (
-                    <span className="mt-2 flex flex-wrap gap-1.5">
-                      {semConsentimento.has(p.id) && (
-                        <span className="rounded-full bg-alertaFundo px-2.5 py-0.5 font-interface text-[11px] font-semibold text-alerta">
-                          Sem consentimento vigente
+                <option value="nome">Nome</option>
+                <option value="ultimo">Sem check-in há mais tempo</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar pacientes">
+            {FILTROS.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setFiltro(f.id)}
+                aria-pressed={filtro === f.id}
+                className={`rounded-full px-4 py-1.5 font-interface text-xs font-semibold ${
+                  filtro === f.id ? 'bg-petroleo text-branco' : 'border border-borda bg-branco text-textoSecundario hover:text-petroleo'
+                }`}
+              >
+                {f.rotulo} <span className={filtro === f.id ? 'text-nevoa' : 'text-textoSecundario/80'}>{grupos[f.id].length}</span>
+              </button>
+            ))}
+          </div>
+
+          {visiveis.length === 0 ? (
+            <p className="rounded-2xl bg-branco p-6 text-sm text-textoSecundario">
+              {termo ? 'Nenhum paciente encontrado com esse nome.' : VAZIO_POR_FILTRO[filtro]}
+            </p>
+          ) : (
+            <ul className="divide-y divide-borda overflow-hidden rounded-2xl bg-branco shadow-cartao">
+              {visiveis.map((l) => (
+                <li key={l.id}>
+                  <Link
+                    to={`/app/admin/pacientes/${l.id}`}
+                    className="flex items-center justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-nevoa"
+                  >
+                    <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1">
+                      <span className="font-titulo text-lg text-petroleo">{l.nome || 'Sem nome'}</span>
+                      <span className="text-sm text-textoSecundario">
+                        {l.acompanhamentoEncerradoEm
+                          ? `Encerrado em ${formatarDia(l.acompanhamentoEncerradoEm, { day: '2-digit', month: '2-digit', year: 'numeric' })}`
+                          : `${l.diasComCheckin}/7 dias${l.ultimo ? ` · último ${formatarDia(l.ultimo, { day: '2-digit', month: '2-digit' })}` : ''}`}
+                      </span>
+                      {l.avisos.map((a) => (
+                        <span key={a} className="rounded-full bg-alertaFundo px-2.5 py-0.5 font-interface text-[11px] font-semibold text-alerta">
+                          {a}
                         </span>
-                      )}
-                      {pediuEncerrar && (
-                        <span className="rounded-full bg-alertaFundo px-2.5 py-0.5 font-interface text-[11px] font-semibold text-alerta">
-                          Pediu encerramento
-                        </span>
-                      )}
+                      ))}
                     </span>
-                  )}
-                </span>
-                <ChevronRight className="shrink-0 text-textoSecundario" aria-hidden />
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
+                    <ChevronRight className="shrink-0 text-textoSecundario" aria-hidden />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </section>
   )
 }

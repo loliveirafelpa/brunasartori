@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Lock } from 'lucide-react'
-import { buscarPerfil, definirRegistroPensamentos } from '../../../lib/perfisApi'
-import { listarCheckins } from '../../../lib/checkinsApi'
+import { buscarPerfil, definirEncerramento, definirRegistroPensamentos } from '../../../lib/perfisApi'
+import { hojeLocal, listarCheckins } from '../../../lib/checkinsApi'
 import { listarRegistrosPensamento } from '../../../lib/pensamentosApi'
 import { listarReflexoes } from '../../../lib/reflexoesApi'
 import { listarObjetivosSemana } from '../../../lib/objetivosApi'
@@ -157,6 +157,24 @@ export default function Paciente() {
     }
   }
 
+  async function alternarEncerramento() {
+    const reabrir = Boolean(perfil.acompanhamentoEncerradoEm)
+    const pergunta = reabrir
+      ? 'Reabrir o acompanhamento? O paciente volta para a lista de ativos.'
+      : 'Marcar o acompanhamento como encerrado? O paciente sai da lista de ativos, mas a conta e os registros continuam como estão.'
+    if (!window.confirm(pergunta)) return
+    const novaData = reabrir ? null : hojeLocal()
+    setSalvandoModulo(true)
+    try {
+      await definirEncerramento(id, novaData)
+      setPerfil((p) => ({ ...p, acompanhamentoEncerradoEm: novaData }))
+    } catch {
+      setErro('Não foi possível alterar o encerramento agora.')
+    } finally {
+      setSalvandoModulo(false)
+    }
+  }
+
   if (erro && !perfil) return <p className="text-alerta">{erro}</p>
   if (!perfil) return <p className="text-textoSecundario">Carregando…</p>
 
@@ -170,7 +188,14 @@ export default function Paciente() {
           <ArrowLeft size={16} aria-hidden /> Pacientes
         </Link>
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="text-3xl">{perfil.nome || 'Sem nome'}</h1>
+          <div>
+            <h1 className="text-3xl">{perfil.nome || 'Sem nome'}</h1>
+            {perfil.acompanhamentoEncerradoEm && (
+              <p className="mt-1 text-sm text-textoSecundario">
+                Acompanhamento encerrado em {formatarDia(perfil.acompanhamentoEncerradoEm, { day: '2-digit', month: '2-digit', year: 'numeric' })}
+              </p>
+            )}
+          </div>
           {abaAtual.usaPeriodo && (
             <div className="flex rounded-full border border-borda bg-branco p-1" role="group" aria-label="Período">
               {PERIODOS.map((p) => (
@@ -216,6 +241,16 @@ export default function Paciente() {
               Registro de pensamentos ativo para este paciente
             </label>
             <FichaEObjetivos userId={id} />
+            <div className="flex flex-wrap items-center gap-3 border-t border-borda pt-5 text-sm text-textoSecundario">
+              <button
+                onClick={alternarEncerramento}
+                disabled={salvandoModulo}
+                className="rounded-full border border-petroleo px-4 py-2 font-interface text-xs font-semibold text-petroleo hover:bg-nevoa disabled:opacity-50"
+              >
+                {perfil.acompanhamentoEncerradoEm ? 'Reabrir acompanhamento' : 'Encerrar acompanhamento'}
+              </button>
+              Só organiza a lista de pacientes: a conta e os registros continuam como estão.
+            </div>
           </div>
         ) : (
           <AnotacoesClinicas userId={id} />

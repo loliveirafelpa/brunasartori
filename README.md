@@ -29,7 +29,7 @@ Se o build reclamar de `@rollup/rollup-win32-x64-msvc`, o binário foi removido 
 - Pensamentos (se ativo para o paciente): situação, pensamento, emoção (botões + "Outra"), intensidade, comportamento. Registros anteriores editáveis/apagáveis.
 - Primeiro acesso: troca da senha provisória → consentimento LGPD (dois checkboxes gravados com data/hora).
 
-**Admin**: lista de pacientes (adesão 7 dias, pedidos de privacidade, sem consentimento) · Novo paciente · Alterar senha (`/app/admin/senha`, pede a senha atual; link "Senha" no cabeçalho) · página do paciente com abas:
+**Admin**: lista de pacientes em linhas compactas, com busca por nome (ignora acentos), filtros Ativos / Precisam de atenção (sem consentimento, pediu encerramento ou sem check-in na semana) / Encerrados e ordenação por nome ou por check-in mais antigo; pedidos de privacidade no topo · Novo paciente · Alterar senha (`/app/admin/senha`, pede a senha atual; link "Senha" no cabeçalho) · página do paciente com abas:
 Resumo (números, síntese por tópico, temas para a sessão, anotações da psicóloga por tópico) · Linha do tempo · Semana · Pensamentos · Ficha e objetivos (objetivos terapêuticos, combinados por semana com histórico, ficha com histórico) · Anotações clínicas (diário e medicações). Período de 7/14/30 dias.
 
 A síntese (`src/lib/sintese.js`) é feita por regras fixas, sem IA: só descreve contagens e coincidências, nunca afirma causa. Ansiedade alta = 7/10 ou mais.
@@ -39,7 +39,7 @@ Projeto Supabase `bruna-sartori-checkin` (ref `qjkauulkxmezcuzondzj`, região S�
 
 | Tabela | Conteúdo | Quem acessa |
 |---|---|---|
-| `profiles` | papel, nome, registro de pensamentos ativo | paciente lê o seu e muda só o nome; Admin lê todos e liga/desliga o módulo |
+| `profiles` | papel, nome, registro de pensamentos ativo, data de encerramento do acompanhamento | paciente lê o seu e muda só o nome; Admin lê todos, liga/desliga o módulo e encerra/reabre o acompanhamento |
 | `consentimentos` | aceites (termos, dado de saúde), versão, data/hora, revogação | paciente cria/revoga os seus; Admin lê |
 | `checkins` | um por dia: humor, emoção, situações, ansiedade 0–10, sono, energia, movimento, acontecimento | paciente; Admin só lê |
 | `reflexoes_semanais` | objetivo do paciente, percepção de avanço, avanços, dificuldades | paciente; Admin só lê |
@@ -54,7 +54,7 @@ Projeto Supabase `bruna-sartori-checkin` (ref `qjkauulkxmezcuzondzj`, região S�
 
 **Regras garantidas no banco (RLS + gatilhos)**
 - Nenhum registro do paciente é gravado sem consentimento de dado de saúde vigente.
-- Registro de pensamentos só é gravado com o módulo ativo; só a Admin muda o módulo (gatilho).
+- Registro de pensamentos só é gravado com o módulo ativo; só a Admin muda o módulo e o encerramento do acompanhamento (gatilho).
 - Funções auxiliares ficam no schema `private`, fora da API.
 - Todas as regras foram testadas simulando paciente, outro paciente e Admin.
 

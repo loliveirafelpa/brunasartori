@@ -40,6 +40,12 @@ export async function definirRegistroPensamentos(id, ativo) {
   if (error) throw error
 }
 
+// Data (AAAA-MM-DD) para encerrar o acompanhamento ou null para reabrir. Só a Admin (gatilho no banco).
+export async function definirEncerramento(id, data) {
+  const { error } = await supabase.from('profiles').update({ acompanhamento_encerrado_em: data }).eq('id', id)
+  if (error) throw error
+}
+
 export async function atualizarMeuNome(userId, nome) {
   const { error } = await supabase.from('profiles').update({ nome }).eq('id', userId)
   if (error) throw error

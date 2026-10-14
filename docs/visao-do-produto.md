@@ -28,6 +28,7 @@ O app **organiza informações e sugere temas de conversa — não afirma causas
   - **Ficha e objetivos:** objetivos terapêuticos em destaque, combinados de cada semana com histórico, ficha com histórico do paciente.
   - **Anotações clínicas:** diário dela sobre o paciente e registro de medicações (em uso e histórico).
 - Recebe na lista de pacientes os pedidos de encerramento de conta e o aviso de quem revogou o consentimento.
+- Encontra pacientes por nome, vê primeiro quem precisa de atenção (sem consentimento, pedido de encerramento ou sem check-in na semana) e separa os acompanhamentos encerrados, que saem da lista principal sem apagar nada.
 - Ficha, histórico, anotações, medicações e comentários são **só dela**: o paciente não vê.
 
 ## Cuidados obrigatórios
