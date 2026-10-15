@@ -24,8 +24,8 @@ Se o build reclamar de `@rollup/rollup-win32-x64-msvc`, o binário foi removido 
 
 ## Telas
 **Paciente** (navegação fixa embaixo no celular): Início · Check-in · Semana · Pensamentos · Meus dados (ícone de escudo no cabeçalho).
-- Check-in diário em três blocos (como está, corpo, dia): humor, emoção, situações, ansiedade 0–10, sono, energia, movimento, acontecimento. Dias anteriores escolhidos numa lista e editáveis.
-- Sequência de check-ins ("ofensiva", `src/components/Sequencia.jsx` + `src/lib/sequencia.js`): dias seguidos com check-in, últimos 7 dias e maior sequência, no Início e depois de salvar o check-in de hoje. Calculada no navegador a partir das datas dos check-ins (sem tabela nova). Continua viva até o fim do dia seguinte; quebrar a sequência gera recado acolhedor, nunca de cobrança.
+- Check-in diário em três blocos (como está, corpo, dia): humor, emoção, situações, ansiedade 0–10, sono (horas numa roda de rolagem, `RodaHorasSono`, de meia em meia hora), energia, movimento, acontecimento. Dias anteriores escolhidos numa lista e editáveis.
+- Sequência de check-ins ("ofensiva", `src/components/Sequencia.jsx` + `src/lib/sequencia.js`): dias seguidos com check-in, últimos 7 dias em bolinhas e recorde, numa faixa discreta no Início e depois de salvar o check-in de hoje. Calculada no navegador a partir das datas dos check-ins (sem tabela nova). Continua viva até o fim do dia seguinte; quebrar a sequência gera recado acolhedor, nunca de cobrança.
 - Semana: combinado na sessão (se houver) ou objetivo escrito pelo paciente, percepção de avanço, avanços e dificuldades; objetivos terapêuticos no fim. Semanas anteriores editáveis.
 - Pensamentos (se ativo para o paciente): situação, pensamento, emoção (botões + "Outra"), intensidade, comportamento. Registros anteriores editáveis/apagáveis.
 - Primeiro acesso: troca da senha provisória → consentimento LGPD (dois checkboxes gravados com data/hora).
@@ -42,7 +42,7 @@ Projeto Supabase `bruna-sartori-checkin` (ref `qjkauulkxmezcuzondzj`, região S�
 |---|---|---|
 | `profiles` | papel, nome, registro de pensamentos ativo, data de encerramento do acompanhamento | paciente lê o seu e muda só o nome; Admin lê todos, liga/desliga o módulo e encerra/reabre o acompanhamento |
 | `consentimentos` | aceites (termos, dado de saúde), versão, data/hora, revogação | paciente cria/revoga os seus; Admin lê |
-| `checkins` | um por dia: humor, emoção, situações, ansiedade 0–10, sono, energia, movimento, acontecimento | paciente; Admin só lê |
+| `checkins` | um por dia: humor, emoção, situações, ansiedade 0–10, sono (horas numa roda de rolagem, `RodaHorasSono`, de meia em meia hora), energia, movimento, acontecimento | paciente; Admin só lê |
 | `reflexoes_semanais` | objetivo do paciente, percepção de avanço, avanços, dificuldades | paciente; Admin só lê |
 | `registros_pensamento` | situação → pensamento → emoção → intensidade → comportamento | paciente; Admin só lê |
 | `objetivos_terapeuticos` | objetivos gerais | Admin grava; paciente lê |

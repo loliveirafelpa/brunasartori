@@ -17,6 +17,7 @@ import Pagina, { Destaque } from '../../components/Pagina'
 import { Linha } from '../../components/RegistrosAnteriores'
 import SeletorDeDia from '../../components/SeletorDeDia'
 import Sequencia from '../../components/Sequencia'
+import RodaHorasSono from '../../components/RodaHorasSono'
 
 const escala = (rotulos) => rotulos.map((rotulo, i) => ({ valor: i + 1, rotulo }))
 
@@ -241,16 +242,11 @@ export default function CheckinDiario() {
 
           <div className="space-y-3">
             <EscolhaUnica nome="sono" legenda="Como foi seu sono na última noite?" opcoes={escala(ESCALA_SONO)} valor={form.sonoQualidade} onChange={muda('sonoQualidade')} />
-            <Campo
-              rotulo="Quantas horas você dormiu, mais ou menos?"
+            <RodaHorasSono
               id="sono-horas"
-              type="number"
-              min="0"
-              max="24"
-              step="0.5"
-              inputMode="decimal"
-              value={form.sonoHoras}
-              onChange={(e) => muda('sonoHoras')(e.target.value)}
+              rotulo="Quantas horas você dormiu, mais ou menos?"
+              valor={form.sonoHoras}
+              onChange={muda('sonoHoras')}
             />
           </div>
 
