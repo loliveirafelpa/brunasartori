@@ -1,5 +1,5 @@
-// Barra de 0 a 10. Com `valor` nulo, a pergunta aparece como "não respondida"
-// até o paciente tocar na barra — assim uma resposta opcional não vira 0 sem querer.
+// Barra de 0 a 10, sempre pronta para arrastar. Com `valor` nulo, a pergunta conta como
+// "não respondida" (–/10) até o paciente mexer — assim uma resposta opcional não vira 0 sem querer.
 export default function BarraEscala({ id, rotulo, ajuda, valor, onChange, minimo = 'Nada', maximo = 'Muito', opcional = false }) {
   const respondido = valor !== null && valor !== undefined
   const definir = (e) => onChange(Number(e.target.value))
@@ -9,7 +9,7 @@ export default function BarraEscala({ id, rotulo, ajuda, valor, onChange, minimo
       <div className="flex items-baseline justify-between gap-3">
         <label htmlFor={id} className="font-titulo text-lg leading-snug text-petroleo">{rotulo}</label>
         <span className="shrink-0 font-interface text-sm font-semibold text-petroleo" aria-live="polite">
-          {respondido ? `${valor}/10` : <span className="font-medium text-textoSecundario">toque na barra</span>}
+          {respondido ? `${valor}/10` : <span className="font-medium text-textoSecundario">–/10</span>}
         </span>
       </div>
       {ajuda && <p className="mt-1 text-sm text-textoSecundario">{ajuda}</p>}
@@ -22,7 +22,7 @@ export default function BarraEscala({ id, rotulo, ajuda, valor, onChange, minimo
         value={respondido ? valor : 0}
         onChange={definir}
         onPointerUp={definir}
-        className={`mt-3 w-full accent-petroleo ${respondido ? '' : 'opacity-40'}`}
+        className="mt-3 w-full accent-petroleo"
       />
       <div className="flex justify-between font-interface text-xs text-textoSecundario">
         <span>0 · {minimo}</span>
