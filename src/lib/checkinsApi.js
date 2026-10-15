@@ -88,3 +88,14 @@ export async function listarCheckins(userId, desde) {
   if (error) throw error
   return data.map(deBanco)
 }
+
+// Só as datas dos check-ins do paciente, para calcular a sequência de dias.
+export async function listarDatasDeCheckin(userId) {
+  const { data, error } = await supabase
+    .from('checkins')
+    .select('data')
+    .eq('user_id', userId)
+    .order('data', { ascending: false })
+  if (error) throw error
+  return data.map((l) => l.data)
+}

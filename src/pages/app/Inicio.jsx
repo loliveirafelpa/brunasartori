@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BrainCircuit, CalendarHeart, Check, ChevronRight, Handshake, Sprout } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
-import { buscarCheckinDoDia, hojeLocal } from '../../lib/checkinsApi'
+import { buscarCheckinDoDia, hojeLocal, listarDatasDeCheckin } from '../../lib/checkinsApi'
+import { calcularSequencia } from '../../lib/sequencia'
 import { buscarReflexaoDaSemana, inicioDaSemana } from '../../lib/reflexoesApi'
 import { buscarObjetivoSemana } from '../../lib/objetivosApi'
 import Pagina, { Destaque } from '../../components/Pagina'
+import Sequencia from '../../components/Sequencia'
 
 function Atalho({ to, icone, titulo, texto, feito, principal = false }) {
   return (
@@ -41,12 +43,14 @@ export default function Inicio() {
   const [checkinHoje, setCheckinHoje] = useState(null)
   const [reflexaoSemana, setReflexaoSemana] = useState(null)
   const [combinado, setCombinado] = useState(null)
+  const [sequencia, setSequencia] = useState(null)
 
   useEffect(() => {
     const semana = inicioDaSemana()
     buscarCheckinDoDia(usuario.id, hojeLocal()).then(setCheckinHoje).catch(() => {})
     buscarReflexaoDaSemana(usuario.id, semana).then(setReflexaoSemana).catch(() => {})
     buscarObjetivoSemana(usuario.id, semana).then(setCombinado).catch(() => {})
+    listarDatasDeCheckin(usuario.id).then((datas) => setSequencia(calcularSequencia(datas))).catch(() => {})
   }, [usuario.id])
 
   const primeiroNome = perfil?.nome?.split(' ')[0]
@@ -76,6 +80,7 @@ export default function Inicio() {
         feito={!!checkinHoje}
         principal
       />
+      {sequencia && <Sequencia sequencia={sequencia} />}
 
       {combinado && (
         <Link to="/app/semana" className="block rounded-3xl border-l-4 border-verdeAgua bg-branco p-5 shadow-cartao">

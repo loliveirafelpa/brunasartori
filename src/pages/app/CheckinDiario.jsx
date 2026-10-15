@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Pencil } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
-import { buscarCheckinDoDia, hojeLocal, listarCheckins, salvarCheckin } from '../../lib/checkinsApi'
+import { buscarCheckinDoDia, hojeLocal, listarCheckins, listarDatasDeCheckin, salvarCheckin } from '../../lib/checkinsApi'
+import { calcularSequencia } from '../../lib/sequencia'
 import { diasDoPeriodo, formatarDia, rotuloEmocao, rotuloSituacao } from '../../lib/sintese'
 import { EMOCOES, ESCALA_ENERGIA, ESCALA_SONO, HUMORES, MOVIMENTO, SITUACOES } from '../../data/checkinOpcoes'
 import EscolhaUnica from '../../components/EscolhaUnica'
@@ -15,6 +16,7 @@ import Bloco from '../../components/Bloco'
 import Pagina, { Destaque } from '../../components/Pagina'
 import { Linha } from '../../components/RegistrosAnteriores'
 import SeletorDeDia from '../../components/SeletorDeDia'
+import Sequencia from '../../components/Sequencia'
 
 const escala = (rotulos) => rotulos.map((rotulo, i) => ({ valor: i + 1, rotulo }))
 
@@ -68,6 +70,7 @@ export default function CheckinDiario() {
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [anteriores, setAnteriores] = useState([])
+  const [sequencia, setSequencia] = useState(null)
 
   useEffect(() => {
     listarCheckins(usuario.id, diasDoPeriodo(60)[0])
@@ -110,6 +113,7 @@ export default function CheckinDiario() {
       })
       if (!ehHoje) setAnteriores((cs) => cs.map((c) => (c.data === data ? salvoAgora : c)))
       setSalvo(true)
+      if (ehHoje) listarDatasDeCheckin(usuario.id).then((datas) => setSequencia(calcularSequencia(datas))).catch(() => {})
     } catch {
       setErro('Não foi possível salvar agora. Suas respostas continuam aqui — tente de novo em instantes.')
     } finally {
@@ -150,6 +154,7 @@ export default function CheckinDiario() {
         }
       >
         {humorBaixo && <AvisoCrise destaque />}
+        {ehHoje && sequencia && <Sequencia sequencia={sequencia} />}
         <Bloco>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link

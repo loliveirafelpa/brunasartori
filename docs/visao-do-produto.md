@@ -14,6 +14,7 @@ O app **organiza informações e sugere temas de conversa — não afirma causas
 
 ## O que o paciente faz
 - **Check-in diário** (menos de um minuto): humor, emoção mais presente, situações ligadas ao que sentiu, ansiedade/estresse de 0 a 10, sono, energia, se se movimentou e algum acontecimento importante.
+- **Sequência de check-ins** (como a ofensiva do Duolingo): o paciente vê há quantos dias seguidos faz o check-in, a sua semana marcada e o seu recorde. Serve de incentivo gentil — quando a sequência quebra, o app acolhe ("recomeçar também é cuidado"), sem culpa.
 - **Semana:** vê o "combinado na sessão" (ou escreve o próprio objetivo), diz quanto sente que avançou, o que foi avanço e o que foi difícil. Vê também seus objetivos na terapia.
 - **Registro de pensamentos** (TCC, se a Bruna ativar): situação, pensamento, emoção, intensidade e comportamento.
 - Pode rever e **editar registros de dias anteriores**.
