@@ -18,7 +18,7 @@ export default function AppShell() {
   // Conta criada pela psicóloga com senha provisória: trocar antes de qualquer coisa.
   if (sessao.user.user_metadata?.trocar_senha) return <Navigate to="/definir-senha" replace />
   // Sem consentimento, o paciente ainda pode autorizar de novo ou cuidar dos próprios dados.
-  if (!ehAdmin && !consentiu && !['/app/consentimento', '/app/meus-dados'].includes(pathname)) {
+  if (!ehAdmin && !consentiu && !['/app/consentimento', '/app/meus-dados', '/app/senha'].includes(pathname)) {
     return <Navigate to="/app/consentimento" replace />
   }
 
@@ -68,7 +68,7 @@ export default function AppShell() {
           <div className="flex items-center gap-4">
             {ehAdmin && (
               <NavLink
-                to="/app/admin/senha"
+                to="/app/senha"
                 aria-label="Alterar senha"
                 className={({ isActive }) =>
                   `flex items-center gap-1.5 font-interface text-xs font-semibold hover:text-branco ${isActive ? 'text-branco' : 'text-nevoa'}`

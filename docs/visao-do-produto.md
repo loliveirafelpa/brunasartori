@@ -21,7 +21,7 @@ O app **organiza informações e sugere temas de conversa — não afirma causas
 - **Semana:** vê o objetivo da semana combinado na sessão (só a Bruna escreve), diz quanto sente que avançou, o que foi avanço e o que foi difícil. Vê também seus objetivos na terapia, numerados.
 - **Registro de pensamentos** (TCC, para todos): situação, pensamento, emoção, intensidade e comportamento.
 - Pode rever e **editar registros de dias anteriores**.
-- **Meus dados:** baixar seus dados, revogar o consentimento, apagar o que registrou e pedir o encerramento da conta.
+- **Meus dados:** trocar a própria senha, baixar seus dados, revogar o consentimento, apagar o que registrou e pedir o encerramento da conta.
 - Em todas as telas, o aviso de que o app não é canal de emergência (CVV 188, SAMU 192).
 
 ## O que a Bruna faz

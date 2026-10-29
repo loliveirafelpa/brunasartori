@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Download, FileText, ShieldOff, Trash2, UserX } from 'lucide-react'
+import { Download, FileText, KeyRound, ShieldOff, Trash2, UserX } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { buscarConsentimentoSaude, revogarConsentimentoSaude } from '../../lib/consentimentosApi'
 import { apagarMeusRegistros, exportarMeusDados, listarMinhasSolicitacoes, pedirEncerramentoDaConta } from '../../lib/privacidadeApi'
@@ -209,6 +209,17 @@ function Encerrar({ userId }) {
   )
 }
 
+function Senha() {
+  return (
+    <Bloco titulo="Senha de acesso" icone={<KeyRound size={15} />}>
+      <p className="mb-4 text-sm leading-relaxed text-textoSecundario">Troque a sua senha quando quiser. Vamos pedir a senha atual antes.</p>
+      <Link to="/app/senha" className="font-interface text-sm font-semibold text-petroleo underline">
+        Alterar senha
+      </Link>
+    </Bloco>
+  )
+}
+
 export default function MeusDados() {
   const { usuario, recarregar } = useAuth()
 
@@ -222,6 +233,7 @@ export default function MeusDados() {
       }
       descricao="Seus registros são seus. Aqui você decide o que fazer com eles."
     >
+      <Senha />
       <Baixar userId={usuario.id} />
       <Consentimento userId={usuario.id} onRevogado={recarregar} />
       <Apagar userId={usuario.id} />
