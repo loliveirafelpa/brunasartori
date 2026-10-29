@@ -5,6 +5,8 @@ import Login from './pages/Login'
 import DefinirSenha from './pages/DefinirSenha'
 import Privacidade from './pages/Privacidade'
 import MeusDados from './pages/app/MeusDados'
+import Crise from './pages/app/Crise'
+import Questionario from './pages/app/Questionario'
 import Consentimento from './pages/app/Consentimento'
 import Inicio from './pages/app/Inicio'
 import CheckinDiario from './pages/app/CheckinDiario'
@@ -40,6 +42,8 @@ export default function App() {
             <Route path="checkin" element={<SomentePaciente><CheckinDiario /></SomentePaciente>} />
             <Route path="semana" element={<SomentePaciente><ReflexaoSemanal /></SomentePaciente>} />
             <Route path="pensamentos" element={<SomentePaciente><RegistroPensamentos /></SomentePaciente>} />
+            <Route path="crise" element={<SomentePaciente><Crise /></SomentePaciente>} />
+            <Route path="questionario/:tipo" element={<SomentePaciente><Questionario /></SomentePaciente>} />
             <Route path="meus-dados" element={<SomentePaciente><MeusDados /></SomentePaciente>} />
             <Route path="admin" element={<SomenteAdmin><Pacientes /></SomenteAdmin>} />
             <Route path="admin/pacientes/novo" element={<SomenteAdmin><NovoPaciente /></SomenteAdmin>} />

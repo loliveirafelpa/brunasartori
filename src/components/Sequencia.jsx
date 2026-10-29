@@ -12,11 +12,15 @@ function recado({ atual, recorde, feitoHoje, total }) {
 }
 
 // Faixa discreta da "ofensiva": dias seguidos de check-in e os últimos 7 dias em bolinhas.
-export default function Sequencia({ sequencia }) {
+// `embutida`: dentro de outro cartão (no Início, no rodapé do "Check-in de hoje"), sem fundo próprio.
+export default function Sequencia({ sequencia, embutida = false }) {
   const { atual, feitoHoje, semana } = sequencia
 
   return (
-    <section className="flex items-center gap-3 rounded-2xl bg-branco px-4 py-3 shadow-cartao" aria-label="Sequência de check-ins">
+    <section
+      className={`flex items-center gap-3 ${embutida ? 'border-t border-borda/70 pt-3' : 'rounded-2xl bg-branco px-4 py-3 shadow-cartao'}`}
+      aria-label="Sequência de check-ins"
+    >
       <Flame
         size={20}
         className={`shrink-0 ${atual > 0 ? 'text-salvia' : 'text-borda'}`}

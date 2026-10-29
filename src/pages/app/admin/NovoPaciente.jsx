@@ -5,6 +5,10 @@ import { criarPaciente } from '../../../lib/fichasApi'
 import { hojeLocal } from '../../../lib/checkinsApi'
 import Campo from '../../../components/Campo'
 import Botao from '../../../components/Botao'
+import CamposConsulta from '../../../components/CamposConsulta'
+import { CONSULTA_VAZIA, consultaDoForm } from '../../../data/consulta'
+import { GRUPOS, MODULOS } from '../../../data/modulos'
+import { ESCALAS, rotuloFrequencia } from '../../../data/escalas'
 
 // Link do WhatsApp com a mensagem pronta. Número brasileiro sem DDI ganha o 55.
 function linkWhatsapp(numero, texto) {
@@ -40,7 +44,7 @@ function Credenciais({ paciente, onOutro }) {
         <Check className="text-verdeAgua" aria-hidden /> {paciente.nome} cadastrado
       </h1>
 
-      <div className="space-y-3 rounded-2xl bg-branco p-6 shadow-sm">
+      <div className="space-y-3 rounded-2xl bg-branco p-5 shadow-sm sm:p-6">
         <p className="flex items-center gap-2 font-interface text-sm font-semibold text-petroleo">
           <KeyRound size={16} aria-hidden /> Dados de acesso
         </p>
@@ -93,8 +97,10 @@ const VAZIO = {
   whatsapp: '',
   inicioAcompanhamento: hojeLocal(),
   historico: '',
+  consulta: CONSULTA_VAZIA,
   objetivosTerapeuticos: '',
-  registroPensamentosAtivo: true,
+  modulos: Object.fromEntries(MODULOS.map((m) => [m.id, false])),
+  escalas: {}, // { epds: true }: questionários a aplicar (só vale com o módulo ligado)
 }
 
 export default function NovoPaciente() {
@@ -109,7 +115,7 @@ export default function NovoPaciente() {
     setErro('')
     setEnviando(true)
     try {
-      const r = await criarPaciente(form)
+      const r = await criarPaciente({ ...form, consulta: consultaDoForm(form.consulta) })
       setCriado({ ...r, nome: form.nome.trim(), whatsapp: form.whatsapp })
       window.scrollTo({ top: 0 })
     } catch (err) {
@@ -140,7 +146,7 @@ export default function NovoPaciente() {
         <UserPlus className="text-verdeAgua" aria-hidden /> Novo paciente
       </h1>
 
-      <form onSubmit={salvar} className="space-y-5 rounded-2xl bg-branco p-6 shadow-sm">
+      <form onSubmit={salvar} className="space-y-5 rounded-2xl bg-branco p-5 shadow-sm sm:p-6">
         <Campo rotulo="Nome" id="nome" required maxLength={120} autoComplete="off" value={form.nome} onChange={muda('nome')} />
         <Campo
           rotulo="E-mail"
@@ -156,6 +162,7 @@ export default function NovoPaciente() {
           <Campo rotulo="WhatsApp" id="whatsapp" type="tel" maxLength={30} placeholder="(11) 99999-9999" value={form.whatsapp} onChange={muda('whatsapp')} />
           <Campo rotulo="Início do acompanhamento" id="inicio" type="date" value={form.inicioAcompanhamento} onChange={muda('inicioAcompanhamento')} />
         </div>
+        <CamposConsulta id="novo-consulta" valor={form.consulta} onChange={(consulta) => setForm((f) => ({ ...f, consulta }))} />
         <Campo
           rotulo="Histórico do paciente"
           id="historico"
@@ -174,10 +181,42 @@ export default function NovoPaciente() {
           value={form.objetivosTerapeuticos}
           onChange={muda('objetivosTerapeuticos')}
         />
-        <label className="flex items-center gap-3 text-sm">
-          <input type="checkbox" className="h-4 w-4 accent-petroleo" checked={form.registroPensamentosAtivo} onChange={muda('registroPensamentosAtivo')} />
-          Registro de pensamentos ativo
-        </label>
+
+        <fieldset className="space-y-3 rounded-xl bg-papel p-4">
+          <legend className="font-interface text-sm font-semibold text-texto">Módulos e protocolos</legend>
+          <p className="text-xs text-textoSecundario">Opcional. Dá para ligar e desligar depois, na aba “Protocolos”.</p>
+          {GRUPOS.map((g) => (
+            <div key={g.id}>
+              <p className="mb-1.5 font-interface text-xs font-semibold uppercase tracking-wider text-petroleo">{g.rotulo}</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {MODULOS.filter((m) => m.grupo === g.id).map((m) => (
+                  <div key={m.id}>
+                    <label className="flex items-center gap-2.5 text-sm">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-petroleo"
+                        checked={form.modulos[m.id]}
+                        onChange={(e) => setForm((f) => ({ ...f, modulos: { ...f.modulos, [m.id]: e.target.checked } }))}
+                      />
+                      {m.nome}
+                    </label>
+                    {m.escala && form.modulos[m.id] && (
+                      <label className="ml-6 mt-1.5 flex items-center gap-2.5 text-xs text-textoSecundario">
+                        <input
+                          type="checkbox"
+                          className="h-3.5 w-3.5 accent-petroleo"
+                          checked={Boolean(form.escalas[m.escala])}
+                          onChange={(e) => setForm((f) => ({ ...f, escalas: { ...f.escalas, [m.escala]: e.target.checked } }))}
+                        />
+                        Aplicar {ESCALAS[m.escala].nome} ({rotuloFrequencia(ESCALAS[m.escala].intervaloDias).toLowerCase()})
+                      </label>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </fieldset>
 
         {erro && <p className="text-sm text-alerta" role="alert">{erro}</p>}
         <Botao type="submit" className="w-full" disabled={enviando}>

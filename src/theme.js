@@ -14,6 +14,19 @@ export const cores = {
   borda: '#C9D9DA',
   alerta: '#A8553D', // avisos de crise e erros — terracota suave, sem vermelho agressivo
   alertaFundo: '#F6E7E1',
+  atencao: '#8A5A10', // destaques para a psicóloga conferir (não é diagnóstico)
+  atencaoFundo: '#FBF1E1',
+  // Gráficos — derivados da paleta da marca, mesmo esquema validado na demo (daltonismo e contraste sobre o branco).
+  serie1: '#2F7F86', // série principal
+  serie2: '#C8693E', // segunda série, só em comparações de dois grupos
+  serieSuave: '#A9D0CD', // pontos diários atrás da média (ênfase menor)
+  grade: '#E3ECEC', // linhas de grade e eixos, recessivos
+  // Escala ordinal do mapa de calor (claro → escuro, um só tom).
+  escala1: '#9CCFC8',
+  escala2: '#6FB3AB',
+  escala3: '#4A958F',
+  escala4: '#356F7A',
+  escala5: '#254C5D',
 }
 
 export const fontes = {

@@ -9,7 +9,7 @@ export default function EscolhaUnica({ nome, legenda, opcoes, valor, onChange, c
           return (
             <label
               key={o.valor}
-              className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border px-1.5 py-3 text-center font-interface text-[11px] font-medium leading-tight transition-colors sm:text-xs ${
+              className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border px-1.5 py-3 text-center font-interface text-xs font-medium leading-tight transition-colors sm:text-xs ${
                 selecionado
                   ? 'border-petroleo bg-petroleo text-branco shadow-cartao'
                   : 'border-transparent bg-papel text-texto hover:border-salvia'

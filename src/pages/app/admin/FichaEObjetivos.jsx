@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { ClipboardList, Handshake, Lock, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ClipboardList, Handshake, Pencil, Plus, Target, Trash2 } from 'lucide-react'
 import { buscarFicha, salvarFicha } from '../../../lib/fichasApi'
 import {
   buscarObjetivosTerapeuticos,
+  listaDeObjetivos,
   listarObjetivosSemana,
   salvarObjetivoSemana,
   salvarObjetivosTerapeuticos,
@@ -12,6 +13,9 @@ import { hojeLocal } from '../../../lib/checkinsApi'
 import { formatarDia } from '../../../lib/sintese'
 import Campo from '../../../components/Campo'
 import Botao from '../../../components/Botao'
+import BotaoAcao from '../../../components/BotaoAcao'
+import CamposConsulta from '../../../components/CamposConsulta'
+import { consultaDoForm, consultaParaForm, proximaConsulta, rotuloConsulta, rotuloProxima } from '../../../data/consulta'
 
 const dataBr = (iso) => formatarDia(iso, { day: '2-digit', month: '2-digit', year: 'numeric' })
 const diaMes = (iso) => formatarDia(iso, { day: '2-digit', month: '2-digit' })
@@ -27,10 +31,12 @@ const segundaDe = (iso) => {
   return inicioDaSemana(new Date(a, m - 1, d))
 }
 
+// Um objetivo por linha. Tira numeração ou marcador digitados à mão, já que a lista numera sozinha.
+
 // ---------------------------------------------------------------------------
-// Objetivos terapêuticos — em destaque, no petróleo da marca
+// Objetivos terapêuticos — numerados; o paciente vê na aba Semana
 // ---------------------------------------------------------------------------
-function ObjetivosTerapeuticos({ userId }) {
+export function ObjetivosTerapeuticos({ userId }) {
   const [objetivos, setObjetivos] = useState(undefined)
   const [texto, setTexto] = useState(null) // null = não está editando
   const [erro, setErro] = useState('')
@@ -54,50 +60,52 @@ function ObjetivosTerapeuticos({ userId }) {
   if (objetivos === undefined) return null
 
   return (
-    <section className="rounded-2xl bg-petroleo p-6 text-branco shadow-sm sm:p-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="font-interface text-[11px] font-semibold uppercase tracking-wider text-nevoa">Objetivos terapêuticos</p>
+    <section className="space-y-4 rounded-2xl bg-branco p-5 shadow-sm sm:p-6">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-xl">
+          <Target size={18} className="shrink-0 text-salvia" aria-hidden /> Objetivos terapêuticos
+        </h2>
         {texto === null && (
-          <button
-            onClick={() => setTexto(objetivos?.texto ?? '')}
-            className="inline-flex items-center gap-1 font-interface text-xs font-semibold text-nevoa hover:text-branco hover:underline"
-          >
-            <Pencil size={13} aria-hidden /> {objetivos ? 'Editar' : 'Definir objetivos'}
-          </button>
+          <BotaoAcao icone={Pencil} className="-mr-3" onClick={() => setTexto(objetivos?.texto ?? '')}>
+            {objetivos ? 'Editar' : 'Definir'}
+          </BotaoAcao>
         )}
       </div>
 
       {texto !== null ? (
-        <form onSubmit={salvar} className="mt-4 space-y-3">
-          <label htmlFor="objetivos-gerais" className="sr-only">Objetivos terapêuticos</label>
-          <textarea
+        <form onSubmit={salvar} className="space-y-3">
+          <Campo
+            rotulo="Um objetivo por linha"
             id="objetivos-gerais"
+            multilinha
             rows={5}
             maxLength={4000}
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
-            className="w-full rounded-xl border-0 bg-branco px-4 py-3 text-texto"
+            ajuda="A numeração é automática. O paciente vê estes objetivos na aba Semana. Deixe em branco para remover."
           />
-          <p className="text-xs text-nevoa">O paciente vê estes objetivos na aba Semana. Deixe em branco para remover.</p>
-          {erro && <p className="text-sm text-alertaFundo">{erro}</p>}
+          {erro && <p className="text-sm text-alerta">{erro}</p>}
           <div className="flex gap-3">
-            <button type="submit" className="rounded-full bg-branco px-5 py-2.5 font-interface text-sm font-semibold text-petroleo hover:bg-nevoa">
-              Salvar objetivos
-            </button>
-            <button type="button" onClick={() => setTexto(null)} className="px-3 font-interface text-sm text-nevoa hover:text-branco">
-              Cancelar
-            </button>
+            <Botao type="submit">Salvar objetivos</Botao>
+            <Botao type="button" variante="discreto" onClick={() => setTexto(null)}>Cancelar</Botao>
           </div>
         </form>
       ) : objetivos ? (
         <>
-          <p className="mt-3 whitespace-pre-wrap font-titulo text-xl leading-relaxed sm:text-2xl">{objetivos.texto}</p>
-          <p className="mt-4 text-xs text-nevoa">
-            Atualizado em {new Date(objetivos.updatedAt).toLocaleDateString('pt-BR')} · visível para o paciente
+          <ol className="space-y-3">
+            {listaDeObjetivos(objetivos.texto).map((o, i) => (
+              <li key={i} className="flex items-baseline gap-3">
+                <span className="w-5 shrink-0 text-right font-interface text-sm font-semibold text-salvia">{i + 1}.</span>
+                <span className="font-titulo text-lg leading-snug text-petroleo">{o}</span>
+              </li>
+            ))}
+          </ol>
+          <p className="text-xs text-textoSecundario">
+            Atualizado em {new Date(objetivos.updatedAt).toLocaleDateString('pt-BR')} · o paciente vê
           </p>
         </>
       ) : (
-        <p className="mt-3 font-titulo text-xl italic text-nevoa">Nenhum objetivo definido ainda.</p>
+        <p className="text-sm text-textoSecundario">Nenhum objetivo definido ainda. Use “Definir” para escrever os objetivos combinados com o paciente.</p>
       )}
     </section>
   )
@@ -158,7 +166,7 @@ function FormCombinado({ inicial, combinados, onSalvar, onCancelar }) {
   )
 }
 
-function Combinados({ userId }) {
+export function Combinados({ userId }) {
   const semanaAtual = inicioDaSemana()
   const [combinados, setCombinados] = useState(null)
   const [form, setForm] = useState(null) // 'novo' | id em edição
@@ -187,20 +195,15 @@ function Combinados({ userId }) {
   }
 
   return (
-    <section className="space-y-4 rounded-2xl bg-branco p-6 shadow-sm">
+    <section className="space-y-4 rounded-2xl bg-branco p-5 shadow-sm sm:p-6">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-2xl">
-          <Handshake size={20} className="text-verdeAgua" aria-hidden /> Combinados na sessão
+        <h2 className="flex items-center gap-2 text-xl">
+          <Handshake size={18} className="shrink-0 text-salvia" aria-hidden /> Combinados
         </h2>
         {form !== 'novo' && (
-          <button
-            onClick={() => setForm('novo')}
-            aria-label="Novo combinado"
-            title="Novo combinado"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-petroleo text-branco hover:bg-petroleoEscuro"
-          >
-            <Plus size={18} aria-hidden />
-          </button>
+          <BotaoAcao icone={Plus} className="-mr-3" onClick={() => setForm('novo')}>
+            Novo
+          </BotaoAcao>
         )}
       </div>
       <p className="text-sm text-textoSecundario">O paciente vê o combinado da semana na aba Semana, como “Combinado na sessão”.</p>
@@ -209,7 +212,7 @@ function Combinados({ userId }) {
       {erro && <p className="text-sm text-alerta">{erro}</p>}
 
       {combinados?.length === 0 && form !== 'novo' && (
-        <p className="rounded-xl bg-nevoa p-4 text-sm text-textoSecundario">Nenhum combinado registrado. Use o + para registrar o primeiro.</p>
+        <p className="text-sm text-textoSecundario">Nenhum combinado registrado. Use “Novo” para registrar o primeiro.</p>
       )}
 
       <ol className="space-y-0">
@@ -228,7 +231,11 @@ function Combinados({ userId }) {
                   <div className="flex items-start justify-between gap-3">
                     <p className="font-interface text-xs font-semibold text-textoSecundario">
                       Semana de {intervaloDaSemana(c.semanaInicio)}
-                      {atual && <span className="ml-2 rounded-full bg-petroleo px-2 py-0.5 text-[10px] uppercase tracking-wider text-branco">esta semana</span>}
+                      {atual && (
+                        <span className="ml-2 inline-block whitespace-nowrap rounded-full bg-petroleo px-2 py-0.5 text-xs uppercase tracking-wider text-branco">
+                          esta semana
+                        </span>
+                      )}
                     </p>
                     <div className="flex shrink-0 gap-3 text-textoSecundario">
                       <button onClick={() => setForm(c.id)} className="hover:text-petroleo" aria-label="Editar combinado">
@@ -253,7 +260,7 @@ function Combinados({ userId }) {
 // ---------------------------------------------------------------------------
 // Ficha — cadastro e histórico (só a psicóloga vê)
 // ---------------------------------------------------------------------------
-function Ficha({ userId }) {
+export function Ficha({ userId }) {
   const [ficha, setFicha] = useState(undefined)
   const [form, setForm] = useState(null)
   const [erro, setErro] = useState('')
@@ -268,7 +275,7 @@ function Ficha({ userId }) {
     e.preventDefault()
     setErro('')
     try {
-      setFicha(await salvarFicha({ ...form, userId }))
+      setFicha(await salvarFicha({ ...form, consulta: consultaDoForm(form.consulta), userId }))
       setForm(null)
     } catch {
       setErro('Não foi possível salvar a ficha.')
@@ -278,18 +285,21 @@ function Ficha({ userId }) {
   if (ficha === undefined) return null
 
   return (
-    <section className="space-y-4 rounded-2xl bg-branco p-6 shadow-sm">
+    <section className="space-y-4 rounded-2xl bg-branco p-5 shadow-sm sm:p-6">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-2xl">
-          <ClipboardList size={20} className="text-verdeAgua" aria-hidden /> Ficha
+        <h2 className="flex items-center gap-2 text-xl">
+          <ClipboardList size={18} className="shrink-0 text-salvia" aria-hidden /> Ficha
         </h2>
         {!form && (
-          <button
-            onClick={() => setForm({ email: '', whatsapp: '', inicioAcompanhamento: hojeLocal(), historico: '', ...ficha })}
-            className="inline-flex items-center gap-1 font-interface text-xs font-semibold text-petroleo hover:underline"
+          <BotaoAcao
+            icone={Pencil}
+            className="-mr-3"
+            onClick={() =>
+              setForm({ email: '', whatsapp: '', inicioAcompanhamento: hojeLocal(), historico: '', ...ficha, consulta: consultaParaForm(ficha?.consulta) })
+            }
           >
-            <Pencil size={13} aria-hidden /> Editar
-          </button>
+            Editar
+          </BotaoAcao>
         )}
       </div>
 
@@ -298,6 +308,7 @@ function Ficha({ userId }) {
           <Campo rotulo="E-mail de contato" id="ficha-email" type="email" required value={form.email} onChange={muda('email')} />
           <Campo rotulo="WhatsApp" id="ficha-whatsapp" type="tel" maxLength={30} value={form.whatsapp ?? ''} onChange={muda('whatsapp')} />
           <Campo rotulo="Início do acompanhamento" id="ficha-inicio" type="date" required value={form.inicioAcompanhamento} onChange={muda('inicioAcompanhamento')} />
+          <CamposConsulta id="ficha-consulta" valor={form.consulta} onChange={(consulta) => setForm((f) => ({ ...f, consulta }))} />
           <Campo rotulo="Histórico do paciente" id="ficha-historico" multilinha maxLength={10000} value={form.historico ?? ''} onChange={muda('historico')} />
           <div className="flex gap-3">
             <Botao type="submit">Salvar ficha</Botao>
@@ -310,41 +321,42 @@ function Ficha({ userId }) {
         <>
           <dl className="space-y-2 text-sm">
             <div>
-              <dt className="font-interface text-[11px] font-semibold uppercase tracking-wider text-textoSecundario">E-mail</dt>
+              <dt className="font-interface text-xs font-semibold uppercase tracking-wider text-textoSecundario">Consulta</dt>
+              {rotuloConsulta(ficha.consulta) ? (
+                <dd>
+                  {rotuloConsulta(ficha.consulta)}
+                  <span className="block text-xs text-textoSecundario">Próxima: {rotuloProxima(proximaConsulta(ficha.consulta))}</span>
+                </dd>
+              ) : (
+                <dd className="text-textoSecundario">Sem horário fixo. Use “Editar” para definir.</dd>
+              )}
+            </div>
+            <div>
+              <dt className="font-interface text-xs font-semibold uppercase tracking-wider text-textoSecundario">E-mail</dt>
               <dd className="break-all">{ficha.email}</dd>
             </div>
             {ficha.whatsapp && (
               <div>
-                <dt className="font-interface text-[11px] font-semibold uppercase tracking-wider text-textoSecundario">WhatsApp</dt>
+                <dt className="font-interface text-xs font-semibold uppercase tracking-wider text-textoSecundario">WhatsApp</dt>
                 <dd>{ficha.whatsapp}</dd>
               </div>
             )}
             <div>
-              <dt className="font-interface text-[11px] font-semibold uppercase tracking-wider text-textoSecundario">Em acompanhamento desde</dt>
+              <dt className="font-interface text-xs font-semibold uppercase tracking-wider text-textoSecundario">Em acompanhamento desde</dt>
               <dd>{dataBr(ficha.inicioAcompanhamento)}</dd>
             </div>
           </dl>
-          <div className="rounded-xl bg-nevoa p-4">
-            <p className="flex items-center gap-1.5 font-interface text-[11px] font-semibold uppercase tracking-wider text-petroleo">
-              <Lock size={12} aria-hidden /> Histórico · só você vê
-            </p>
-            <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed">{ficha.historico || '—'}</p>
+          <div className="border-t border-borda pt-4">
+            <p className="font-interface text-xs font-semibold uppercase tracking-wider text-textoSecundario">Histórico</p>
+            {ficha.historico ? (
+              <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed">{ficha.historico}</p>
+            ) : (
+              <p className="mt-1.5 text-sm text-textoSecundario">Nada registrado. Use “Editar” para escrever o histórico do paciente.</p>
+            )}
           </div>
         </>
       )}
       {erro && <p className="text-sm text-alerta">{erro}</p>}
     </section>
-  )
-}
-
-export default function FichaEObjetivos({ userId }) {
-  return (
-    <div className="space-y-6">
-      <ObjetivosTerapeuticos userId={userId} />
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr),22rem]">
-        <Combinados userId={userId} />
-        <Ficha userId={userId} />
-      </div>
-    </div>
   )
 }

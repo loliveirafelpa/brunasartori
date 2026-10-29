@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Navigate } from 'react-router-dom'
 import { CheckCircle2, Pencil, Trash2 } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import {
@@ -141,7 +140,7 @@ function Cartao({ registro, onEditar, onApagar }) {
 }
 
 export default function RegistroPensamentos() {
-  const { usuario, perfil } = useAuth()
+  const { usuario } = useAuth()
   const [registros, setRegistros] = useState(null)
   const [acabouDeSalvar, setAcabouDeSalvar] = useState(null) // 'novo' | 'editado' | null
   const [editando, setEditando] = useState(null)
@@ -150,8 +149,6 @@ export default function RegistroPensamentos() {
   useEffect(() => {
     listarRegistrosPensamento(usuario.id).then(setRegistros).catch(() => setErro('Não foi possível carregar seus registros.'))
   }, [usuario.id])
-
-  if (!perfil?.registroPensamentosAtivo) return <Navigate to="/app" replace />
 
   async function apagar(registro) {
     if (!window.confirm('Apagar este registro? Esta ação não pode ser desfeita.')) return

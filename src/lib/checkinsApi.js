@@ -1,4 +1,8 @@
 import { supabase } from './supabaseClient'
+export { hojeLocal } from './datas'
+
+// Cada check-in leva junto, em `modulos`, as respostas dos módulos ligados
+// (ex.: { tabagismo: { fumou: true, quantidade: 8 } }).
 
 function deBanco(l) {
   return {
@@ -16,6 +20,7 @@ function deBanco(l) {
     acontecimento: l.acontecimento,
     situacoes: l.situacoes ?? [],
     situacaoOutra: l.situacao_outra,
+    modulos: l.modulos ?? {},
     createdAt: l.created_at,
   }
 }
@@ -35,14 +40,8 @@ function paraBanco(c) {
     acontecimento: c.acontecimento?.trim() || null,
     situacoes: c.situacoes ?? [],
     situacao_outra: c.situacoes?.includes('outra') ? c.situacaoOutra?.trim() || null : null,
+    modulos: c.modulos ?? {},
   }
-}
-
-// Data local do paciente (não UTC), no formato AAAA-MM-DD.
-export function hojeLocal() {
-  const d = new Date()
-  const p = (n) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
 }
 
 export async function buscarCheckinDoDia(userId, data) {
@@ -71,11 +70,11 @@ export async function salvarCheckin(checkin) {
 export async function listarCheckinsDeTodos(desde) {
   const { data, error } = await supabase
     .from('checkins')
-    .select('user_id, data, humor, ansiedade')
+    .select('user_id, data, humor, ansiedade, modulos')
     .gte('data', desde)
     .order('data', { ascending: false })
   if (error) throw error
-  return data.map((l) => ({ userId: l.user_id, data: l.data, humor: l.humor, ansiedade: l.ansiedade }))
+  return data.map((l) => ({ userId: l.user_id, data: l.data, humor: l.humor, ansiedade: l.ansiedade, modulos: l.modulos ?? {} }))
 }
 
 export async function listarCheckins(userId, desde) {

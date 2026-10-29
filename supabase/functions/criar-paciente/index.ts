@@ -19,6 +19,24 @@ function gerarSenhaProvisoria(tamanho = 10) {
   return Array.from(bytes, (b) => letras[b % letras.length]).join('')
 }
 
+// Módulos e questionários conhecidos (iguais a src/data/modulos.js e src/data/escalas.js).
+const MODULOS = ['tabagismo', 'alcool', 'puerperio', 'crise', 'bullying', 'luto', 'burnout', 'insonia']
+const ESCALA_DO_MODULO: Record<string, string> = { puerperio: 'epds', crise: 'gad7' }
+const INTERVALO_SUGERIDO = 14 // dias; a psicóloga ajusta depois na aba Protocolos
+
+// Horário fixo da consulta: { diaSemana: 0–6, hora: 'HH:MM', frequencia, referencia } ou null.
+function lerConsulta(c: unknown) {
+  if (c === undefined || c === null) return null
+  const v = c as Record<string, unknown>
+  const ok =
+    Number.isInteger(v.diaSemana) && (v.diaSemana as number) >= 0 && (v.diaSemana as number) <= 6 &&
+    typeof v.hora === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(v.hora) &&
+    (v.frequencia === 'semanal' || v.frequencia === 'quinzenal') &&
+    (v.referencia === null || v.referencia === undefined || (typeof v.referencia === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.referencia)))
+  if (!ok) throw new Error('consulta inválida')
+  return { diaSemana: v.diaSemana, hora: v.hora, frequencia: v.frequencia, referencia: v.referencia ?? null }
+}
+
 const textoOpcional = (v: unknown, max: number) => {
   if (v === undefined || v === null) return null
   if (typeof v !== 'string' || v.length > max) throw new Error('campo inválido')
@@ -41,7 +59,8 @@ Deno.serve(async (req) => {
   if (perfilQuem?.role !== 'admin') return resposta(403, { erro: 'Apenas a psicóloga pode cadastrar pacientes.' })
 
   // 2) Validação dos dados
-  let dados
+  // deno-lint-ignore no-explicit-any
+  let dados: any
   try {
     const corpo = await req.json()
     const nome = typeof corpo.nome === 'string' ? corpo.nome.trim() : ''
@@ -59,8 +78,16 @@ Deno.serve(async (req) => {
       inicio,
       historico: textoOpcional(corpo.historico, 10000),
       objetivos: textoOpcional(corpo.objetivosTerapeuticos, 4000),
-      registroPensamentosAtivo: corpo.registroPensamentosAtivo !== false,
+      modulos: Object.fromEntries(MODULOS.map((m) => [m, corpo.modulos?.[m] === true])),
+      consulta: lerConsulta(corpo.consulta),
     }
+    // Questionários marcados, só dos módulos ligados, na frequência sugerida.
+    const ativadaEm = new Date().toISOString()
+    dados.escalas = Object.fromEntries(
+      Object.entries(ESCALA_DO_MODULO)
+        .filter(([modulo, escala]) => dados.modulos[modulo] && corpo.escalas?.[escala] === true)
+        .map(([, escala]) => [escala, { frequencia: INTERVALO_SUGERIDO, ativadaEm, pedidoEm: null }]),
+    )
   } catch {
     return resposta(400, { erro: 'Dados inválidos.' })
   }
@@ -85,7 +112,7 @@ Deno.serve(async (req) => {
   try {
     const { error: e1 } = await admin
       .from('profiles')
-      .update({ nome: dados.nome, registro_pensamentos_ativo: dados.registroPensamentosAtivo })
+      .update({ nome: dados.nome, modulos: dados.modulos, escalas: dados.escalas })
       .eq('id', id)
     if (e1) throw e1
     const { error: e2 } = await admin.from('fichas_pacientes').insert({
@@ -93,6 +120,7 @@ Deno.serve(async (req) => {
       email: dados.email,
       whatsapp: dados.whatsapp,
       historico: dados.historico,
+      consulta: dados.consulta,
       ...(dados.inicio ? { inicio_acompanhamento: dados.inicio } : {}),
     })
     if (e2) throw e2

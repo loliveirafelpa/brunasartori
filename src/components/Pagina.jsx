@@ -12,7 +12,7 @@ export default function Pagina({ sobretitulo, titulo, descricao, aviso, children
       <div className="bg-petroleo text-branco">
         <div className="mx-auto max-w-xl px-4 pb-16 pt-8 sm:pt-12">
           {sobretitulo && (
-            <p className="font-interface text-[11px] font-semibold uppercase tracking-[0.14em] text-nevoa first-letter:uppercase">
+            <p className="font-interface text-xs font-semibold uppercase tracking-[0.14em] text-nevoa first-letter:uppercase">
               {sobretitulo}
             </p>
           )}

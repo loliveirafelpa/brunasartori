@@ -15,21 +15,26 @@ O app **organiza informações e sugere temas de conversa — não afirma causas
 ## O que o paciente faz
 - **Check-in diário** (menos de um minuto): humor, emoção mais presente, situações ligadas ao que sentiu, ansiedade/estresse de 0 a 10, sono, energia, se se movimentou e algum acontecimento importante.
 - **Sequência de check-ins** (como a ofensiva do Duolingo): o paciente vê há quantos dias seguidos faz o check-in, a sua semana marcada e o seu recorde. Serve de incentivo gentil — quando a sequência quebra, o app acolhe ("recomeçar também é cuidado"), sem culpa.
-- **Semana:** vê o "combinado na sessão" (ou escreve o próprio objetivo), diz quanto sente que avançou, o que foi avanço e o que foi difícil. Vê também seus objetivos na terapia.
-- **Registro de pensamentos** (TCC, se a Bruna ativar): situação, pensamento, emoção, intensidade e comportamento.
+- **Módulos e protocolos** ligados pela Bruna para cada paciente (tabagismo, álcool, puerpério, crise de ansiedade, bullying, luto, esgotamento no trabalho, insônia): entram como poucas perguntas extras no check-in. Perguntas em [`protocolos.md`](protocolos.md).
+- **Questionários** (EPDS no puerpério, GAD-7 na crise de ansiedade), quando a Bruna liga: aparecem no Início, numa janela que pode ser adiada para o dia seguinte.
+- **Crise:** "Ansiedade forte agora?" abre respiração guiada, aterramento e o registro da crise.
+- **Semana:** vê o objetivo da semana combinado na sessão (só a Bruna escreve), diz quanto sente que avançou, o que foi avanço e o que foi difícil. Vê também seus objetivos na terapia, numerados.
+- **Registro de pensamentos** (TCC, para todos): situação, pensamento, emoção, intensidade e comportamento.
 - Pode rever e **editar registros de dias anteriores**.
 - **Meus dados:** baixar seus dados, revogar o consentimento, apagar o que registrou e pedir o encerramento da conta.
 - Em todas as telas, o aviso de que o app não é canal de emergência (CVV 188, SAMU 192).
 
 ## O que a Bruna faz
-- **Cadastra pacientes** (nome, e-mail, WhatsApp, início, histórico, objetivos, registro de pensamentos). O app gera uma senha provisória e uma mensagem pronta para WhatsApp; o paciente troca a senha no primeiro acesso.
+- **Cadastra pacientes** (nome, e-mail, WhatsApp, início, dia e horário da consulta — semanal ou quinzenal —, histórico, objetivos, módulos e questionários). O app gera uma senha provisória e uma mensagem pronta para WhatsApp; o paciente troca a senha no primeiro acesso.
 - Para cada paciente, em abas:
-  - **Resumo** do período (7, 14 ou 30 dias): números, síntese por tópico, possíveis temas para a sessão e espaço para as anotações dela em cada tópico.
-  - **Linha do tempo** dia a dia, **Semana** (reflexões) e **Pensamentos**.
-  - **Ficha e objetivos:** objetivos terapêuticos em destaque, combinados de cada semana com histórico, ficha com histórico do paciente.
-  - **Anotações clínicas:** diário dela sobre o paciente e registro de medicações (em uso e histórico).
+  - **Resumo** do período (7, 14 ou 30 dias, um dia ou um intervalo escolhido): números, síntese por tópico, possíveis temas para a sessão e "Anotar" em cada tópico.
+  - **Gráficos:** evolução de humor, ansiedade, sono e energia (com média e tendência), padrões da semana e o que aparece junto nos registros, sempre descritivo.
+  - **Detalhamento:** tudo o que o paciente respondeu, na íntegra, e os questionários item a item.
+  - **Protocolos:** liga e desliga módulos e questionários, escolhe a frequência e pode pedir um questionário na hora; vê as crises registradas.
+  - **Objetivo da semana** (ela escreve) e **Registro de pensamentos**.
+  - **Anotações clínicas:** o diário dela e todas as anotações do Resumo e dos Gráficos numa linha do tempo, com busca e filtro; e, noutra sub-aba, objetivos, medicações, combinados e a ficha com o horário da consulta.
 - Recebe na lista de pacientes os pedidos de encerramento de conta e o aviso de quem revogou o consentimento.
-- Encontra pacientes por nome, vê primeiro quem precisa de atenção (sem consentimento, pedido de encerramento ou sem check-in na semana) e separa os acompanhamentos encerrados, que saem da lista principal sem apagar nada.
+- Abre a lista de pacientes pela **consulta mais próxima**, com a semana de check-ins em pontos. Encontra pacientes por nome, vê em "Precisam de atenção" os sinais clínicos da semana (crises seguidas, item de risco da EPDS, pensamentos assustadores frequentes no puerpério, ameaça na escola) separados dos avisos administrativos (sem consentimento, pedido de encerramento, sem check-in), e separa os acompanhamentos encerrados, que saem da lista principal sem apagar nada.
 - Troca a própria senha pelo painel (pede a senha atual).
 - Ficha, histórico, anotações, medicações e comentários são **só dela**: o paciente não vê.
 
@@ -50,6 +55,7 @@ Baseada no logo e nos posts do Instagram @bru_psico. Tom acolhedor e validante (
 - **Publicado no Vercel em 14/10/2026**; cada atualização no GitHub vai para o ar sozinha. Banco no Supabase (São Paulo).
 - Conta da Bruna criada (`bru_sartori@hotmail.com`) com senha provisória; ela cria a própria senha no primeiro acesso. Mensagem com acessos e orientações preparada para envio.
 - Contas de teste: uma Admin e um paciente com 5 dias de registros simulados.
+- Em 29/10/2026, o app recebeu o que foi validado na demo: módulos e protocolos, questionários, crises, abas Gráficos, Detalhamento e Protocolos, consulta na ficha e lista de pacientes reorganizada.
 - Antes dos pacientes reais: desligar o cadastro aberto no Supabase e apagar (ou trocar a senha da) Admin de teste.
 
 ## Para validar com a Bruna
@@ -60,10 +66,11 @@ Baseada no logo e nos posts do Instagram @bru_psico. Tom acolhedor e validante (
 - Se o "combinado na sessão" deve valer de segunda a domingo ou de sessão a sessão; e se pode haver mais de um por semana.
 - Se quer que o paciente edite dias antigos sem aviso para ela (hoje o painel mostra só a versão nova).
 - Limite de "ansiedade alta" (hoje 7/10 ou mais).
+- As perguntas de cada módulo (`protocolos.md`).
+- Se os pacientes atuais devem aceitar de novo os termos, que agora citam hábitos, questionários e crises.
 
 ## Ideias para depois
 - Lembrete diário (e-mail, notificação ou WhatsApp).
 - Alertas para a Bruna (ex.: vários dias seguidos de humor muito baixo).
-- Hábitos e comportamentos (Nível 2), com cuidado para não ficar quantitativo demais.
 - Detalhar o exercício físico (tipo e duração).
 - Domínio próprio e convite por e-mail.

@@ -11,7 +11,7 @@ async function todos(tabela, userId, coluna = 'user_id') {
 
 // Tudo o que o paciente pode ver sobre si, num objeto pronto para virar arquivo.
 export async function exportarMeusDados(userId) {
-  const [perfil, consentimentos, checkins, reflexoes, pensamentos, objetivos, combinados, solicitacoes] = await Promise.all([
+  const [perfil, consentimentos, checkins, reflexoes, pensamentos, objetivos, combinados, solicitacoes, questionarios, crises] = await Promise.all([
     todos('profiles', userId, 'id'),
     todos('consentimentos', userId),
     todos('checkins', userId),
@@ -20,6 +20,8 @@ export async function exportarMeusDados(userId) {
     todos('objetivos_terapeuticos', userId),
     todos('objetivos_semana', userId),
     todos('solicitacoes_privacidade', userId),
+    todos('questionarios', userId),
+    todos('crises', userId),
   ])
   return {
     gerado_em: new Date().toISOString(),
@@ -31,12 +33,14 @@ export async function exportarMeusDados(userId) {
     objetivos_terapeuticos: objetivos[0] ?? null,
     combinados_na_sessao: combinados,
     solicitacoes: solicitacoes,
+    questionarios,
+    crises_registradas: crises,
   }
 }
 
 // Apaga o que o próprio paciente registrou. Anotações e ficha da psicóloga não são afetadas.
 export async function apagarMeusRegistros(userId) {
-  for (const tabela of ['checkins', 'reflexoes_semanais', 'registros_pensamento']) {
+  for (const tabela of ['checkins', 'reflexoes_semanais', 'registros_pensamento', 'questionarios', 'crises', 'questionarios_adiados']) {
     const { error } = await supabase.from(tabela).delete().eq('user_id', userId)
     if (error) throw error
   }

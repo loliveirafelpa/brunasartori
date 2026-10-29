@@ -19,6 +19,18 @@ export function diasDoPeriodo(n, hoje = new Date()) {
   })
 }
 
+// Lista de datas (AAAA-MM-DD) de `inicio` a `fim`, inclusive. Se vierem trocadas, inverte.
+export function diasEntre(inicio, fim) {
+  const [de, ate] = inicio <= fim ? [inicio, fim] : [fim, inicio]
+  const [a, m, d] = de.split('-').map(Number)
+  const lista = []
+  for (let i = 0; ; i++) {
+    const iso = paraIso(new Date(a, m - 1, d + i, 12))
+    if (iso > ate) return lista
+    lista.push(iso)
+  }
+}
+
 export function formatarDia(iso, opcoes = { weekday: 'short', day: '2-digit', month: '2-digit' }) {
   const [a, m, d] = iso.split('-').map(Number)
   return new Date(a, m - 1, d).toLocaleDateString('pt-BR', opcoes)
@@ -176,18 +188,12 @@ export function gerarSintese({ checkins, registros, reflexoes, objetivosSemana =
   }
 
   const ultimaReflexao = reflexoes[0]
-  // Objetivo da semana: o combinado na sessão tem prioridade sobre o escrito pelo paciente.
+  // Objetivo da semana: escrito pela psicóloga a partir do combinado na sessão.
   const combinado = objetivosSemana[0]
   if (combinado) {
     temas.push({
       origem: `Combinado na sessão · semana de ${formatarDia(combinado.semanaInicio, { day: '2-digit', month: '2-digit' })}`,
       citacao: trecho(combinado.texto, 160),
-      pergunta: 'Como foi colocar isso em prática?',
-    })
-  } else if (ultimaReflexao?.objetivo) {
-    temas.push({
-      origem: 'Objetivo da semana · escrito pelo paciente',
-      citacao: trecho(ultimaReflexao.objetivo, 160),
       pergunta: 'Como foi colocar isso em prática?',
     })
   }

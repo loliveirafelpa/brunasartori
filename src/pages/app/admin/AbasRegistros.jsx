@@ -1,7 +1,13 @@
-import { Handshake } from 'lucide-react'
+import { useState } from 'react'
+import { Handshake, Pencil } from 'lucide-react'
 import { formatarDia } from '../../../lib/sintese'
+import { inicioDaSemana } from '../../../lib/reflexoesApi'
+import { listarObjetivosSemana, salvarObjetivoSemana } from '../../../lib/objetivosApi'
+import Campo from '../../../components/Campo'
+import Botao from '../../../components/Botao'
+import BotaoAcao from '../../../components/BotaoAcao'
 
-// Abas "Pensamentos" e "Reflexões" do painel do paciente.
+// Abas "Registro de pensamentos" e "Objetivo da semana" (reflexões) do painel do paciente.
 // O petróleo da marca aparece como faixa de cabeçalho de cada cartão; o corpo fica claro.
 
 const Vazio = ({ children }) => <p className="rounded-2xl bg-branco p-6 text-textoSecundario shadow-sm">{children}</p>
@@ -26,7 +32,7 @@ function Etapa({ rotulo, ultima = false, children }) {
     <li className="relative pl-7">
       {!ultima && <span className="absolute left-[5px] top-4 h-[calc(100%-0.25rem)] w-px bg-borda" aria-hidden />}
       <span className="absolute left-0 top-1.5 h-[11px] w-[11px] rounded-full border-2 border-petroleo bg-branco" aria-hidden />
-      <p className="font-interface text-[11px] font-semibold uppercase tracking-wider text-petroleo">{rotulo}</p>
+      <p className="font-interface text-xs font-semibold uppercase tracking-wider text-petroleo">{rotulo}</p>
       <div className="mt-1 pb-5">{children}</div>
     </li>
   )
@@ -101,64 +107,139 @@ function fimDaSemana(iso) {
 function Bloco({ rotulo, children }) {
   return (
     <div>
-      <p className="font-interface text-[11px] font-semibold uppercase tracking-wider text-petroleo">{rotulo}</p>
+      <p className="font-interface text-xs font-semibold uppercase tracking-wider text-petroleo">{rotulo}</p>
       <p className="mt-1.5 whitespace-pre-wrap leading-relaxed">{children}</p>
     </div>
   )
 }
 
-export function Reflexoes({ reflexoes, objetivosSemana }) {
-  if (!reflexoes.length) return <Vazio>Nenhuma reflexão semanal registrada.</Vazio>
-  return (
-    <ul className="mx-auto max-w-3xl space-y-5">
-      {reflexoes.map((r) => {
-        const combinado = objetivosSemana.find((o) => o.semanaInicio === r.semanaInicio)
-        return (
-          <li key={r.id} className="overflow-hidden rounded-2xl bg-branco shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-petroleo px-5 py-3 text-branco">
-              <p className="font-titulo text-lg">
-                Semana de {formatarDia(r.semanaInicio, { day: '2-digit', month: '2-digit' })} a {fimDaSemana(r.semanaInicio)}
-              </p>
-              {r.percepcaoAvanco && <Percepcao valor={r.percepcaoAvanco} />}
-            </div>
+// Objetivo combinado para a semana atual, em destaque, editável aqui mesmo (só a psicóloga escreve).
+function CombinadoDaSemana({ userId, semana, combinado, onSalvo }) {
+  const [editando, setEditando] = useState(false)
+  const [texto, setTexto] = useState('')
+  const [erro, setErro] = useState('')
+  const [enviando, setEnviando] = useState(false)
 
-            <div className="space-y-5 p-5 sm:p-6">
-              {(combinado || r.objetivo) && (
-                <div className="rounded-xl border-l-4 border-petroleo bg-nevoa px-4 py-3">
-                  {combinado ? (
-                    <>
-                      <p className="flex items-center gap-1.5 font-interface text-[11px] font-semibold uppercase tracking-wider text-petroleo">
-                        <Handshake size={13} aria-hidden /> Combinado na sessão
+  function abrir() {
+    setTexto(combinado?.texto ?? '')
+    setErro('')
+    setEditando(true)
+  }
+
+  async function salvar(e) {
+    e.preventDefault()
+    setEnviando(true)
+    setErro('')
+    try {
+      await salvarObjetivoSemana(userId, semana, texto)
+      await onSalvo()
+      setEditando(false)
+    } catch {
+      setErro('Não foi possível salvar o objetivo.')
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border-l-4 border-verdeAgua bg-branco p-5 shadow-sm sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="flex items-center gap-1.5 font-interface text-xs font-semibold uppercase tracking-wider text-petroleo">
+          <Handshake size={14} className="text-salvia" aria-hidden /> Objetivo desta semana · {formatarDia(semana, { day: '2-digit', month: '2-digit' })} a{' '}
+          {fimDaSemana(semana)}
+        </p>
+        {!editando && (
+          <BotaoAcao icone={Pencil} className="-mr-3" onClick={abrir}>
+            {combinado ? 'Editar' : 'Escrever o objetivo'}
+          </BotaoAcao>
+        )}
+      </div>
+      {editando ? (
+        <form onSubmit={salvar} className="mt-3 space-y-3">
+          <Campo
+            rotulo="O que foi combinado na sessão"
+            id="objetivo-semana"
+            multilinha
+            maxLength={2000}
+            placeholder="Ex.: quando o chefe demorar a responder, anotar o pensamento antes de tirar conclusões."
+            ajuda="O paciente vê este texto no Início e na aba Semana. Deixar em branco apaga o objetivo desta semana."
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+          />
+          {erro && <p className="text-sm text-alerta">{erro}</p>}
+          <div className="flex gap-3">
+            <Botao type="submit" disabled={enviando}>{enviando ? 'Salvando…' : 'Salvar objetivo'}</Botao>
+            <Botao type="button" variante="discreto" onClick={() => setEditando(false)}>Cancelar</Botao>
+          </div>
+        </form>
+      ) : combinado ? (
+        <p className="mt-2 whitespace-pre-wrap font-titulo text-xl italic leading-snug text-petroleo">“{combinado.texto}”</p>
+      ) : (
+        <p className="mt-2 text-textoSecundario">Nenhum objetivo combinado para esta semana ainda.</p>
+      )}
+    </section>
+  )
+}
+
+// Aba "Objetivo da semana": o objetivo desta semana no topo e, abaixo, semana a semana,
+// o que foi combinado na sessão e a reflexão do paciente (avanço percebido, avanços e dificuldades).
+export function Reflexoes({ userId, reflexoes, objetivosSemana }) {
+  const semanaAtual = inicioDaSemana()
+  const [combinados, setCombinados] = useState(objetivosSemana)
+  const recarregar = async () => setCombinados(await listarObjetivosSemana(userId))
+
+  const combinadoDe = (semana) => combinados.find((o) => o.semanaInicio === semana)
+  const reflexaoDe = (semana) => reflexoes.find((r) => r.semanaInicio === semana)
+  // Semanas com combinado ou reflexão, da mais recente para a mais antiga.
+  const semanas = [...new Set([...combinados.map((o) => o.semanaInicio), ...reflexoes.map((r) => r.semanaInicio)])]
+    .filter((s) => s !== semanaAtual || reflexaoDe(s))
+    .sort((a, b) => b.localeCompare(a))
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-6">
+      <CombinadoDaSemana userId={userId} semana={semanaAtual} combinado={combinadoDe(semanaAtual)} onSalvo={recarregar} />
+
+      {!semanas.length ? (
+        <Vazio>Nenhuma semana anterior com objetivo ou reflexão.</Vazio>
+      ) : (
+        <ul className="space-y-5">
+          {semanas.map((semana) => {
+            const r = reflexaoDe(semana)
+            // Na semana atual o objetivo já aparece em destaque acima.
+            const combinado = semana !== semanaAtual && combinadoDe(semana)
+            return (
+              <li key={semana} className="overflow-hidden rounded-2xl bg-branco shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-petroleo px-5 py-3 text-branco">
+                  <p className="font-titulo text-lg">
+                    Semana de {formatarDia(semana, { day: '2-digit', month: '2-digit' })} a {fimDaSemana(semana)}
+                  </p>
+                  {r?.percepcaoAvanco && <Percepcao valor={r.percepcaoAvanco} />}
+                </div>
+
+                <div className="space-y-5 p-5 sm:p-6">
+                  {combinado && (
+                    <div className="rounded-xl border-l-4 border-petroleo bg-nevoa px-4 py-3">
+                      <p className="flex items-center gap-1.5 font-interface text-xs font-semibold uppercase tracking-wider text-petroleo">
+                        <Handshake size={13} aria-hidden /> Objetivo combinado na sessão
                       </p>
                       <p className="mt-1 leading-relaxed">{combinado.texto}</p>
-                    </>
+                    </div>
+                  )}
+
+                  {r && (r.avancos || r.dificuldades) ? (
+                    <div className="grid gap-5 sm:grid-cols-2 sm:gap-8">
+                      {r.avancos && <Bloco rotulo="Avanços">{r.avancos}</Bloco>}
+                      {r.dificuldades && <Bloco rotulo="O que foi mais difícil">{r.dificuldades}</Bloco>}
+                    </div>
                   ) : (
-                    <>
-                      <p className="font-interface text-[11px] font-semibold uppercase tracking-wider text-petroleo">
-                        Objetivo escrito pelo paciente
-                      </p>
-                      <p className="mt-1 leading-relaxed">{r.objetivo}</p>
-                    </>
+                    !r && <p className="text-sm italic text-textoSecundario">O paciente não respondeu à reflexão desta semana.</p>
                   )}
                 </div>
-              )}
-
-              {(r.avancos || r.dificuldades) && (
-                <div className="grid gap-5 sm:grid-cols-2 sm:gap-8">
-                  {r.avancos && <Bloco rotulo="Avanços">{r.avancos}</Bloco>}
-                  {r.dificuldades && <Bloco rotulo="O que foi mais difícil">{r.dificuldades}</Bloco>}
-                </div>
-              )}
-
-              {combinado && r.objetivo && (
-                <p className="border-t border-borda pt-4 text-sm text-textoSecundario">
-                  <span className="font-semibold">Objetivo escrito pelo paciente:</span> {r.objetivo}
-                </p>
-              )}
-            </div>
-          </li>
-        )
-      })}
-    </ul>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
   )
 }

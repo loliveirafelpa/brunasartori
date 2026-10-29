@@ -2,6 +2,13 @@ import { supabase } from './supabaseClient'
 
 // Objetivos definidos pela psicóloga. A Admin grava; o paciente só lê (RLS).
 
+// Um objetivo por linha; tira a numeração que tenha sido digitada (a tela numera sozinha).
+export const listaDeObjetivos = (texto) =>
+  texto
+    .split('\n')
+    .map((l) => l.replace(/^\s*(\d+\s*[.)\-–]|[-•*])\s*/, '').trim())
+    .filter(Boolean)
+
 export async function buscarObjetivosTerapeuticos(userId) {
   const { data, error } = await supabase.from('objetivos_terapeuticos').select('texto, updated_at').eq('user_id', userId).limit(1)
   if (error) throw error
@@ -18,7 +25,7 @@ export async function salvarObjetivosTerapeuticos(userId, texto) {
   if (error) throw error
 }
 
-const objetivoSemanaDeBanco = (l) => ({ id: l.id, semanaInicio: l.semana_inicio, texto: l.texto, updatedAt: l.updated_at })
+const objetivoSemanaDeBanco = (l) => ({ id: l.id, userId: l.user_id, semanaInicio: l.semana_inicio, texto: l.texto, updatedAt: l.updated_at })
 
 export async function buscarObjetivoSemana(userId, semanaInicio) {
   const { data, error } = await supabase

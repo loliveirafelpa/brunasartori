@@ -1,11 +1,14 @@
 import { supabase } from './supabaseClient'
 
+// Reflexão semanal do paciente (avanço percebido, avanços e dificuldades). O objetivo da semana
+// não fica aqui: é escrito só pela psicóloga (objetivosApi.js, "objetivos_semana").
+// A coluna antiga `objetivo` continua no banco só para não perder o que já foi escrito.
+
 function deBanco(l) {
   return {
     id: l.id,
     userId: l.user_id,
     semanaInicio: l.semana_inicio,
-    objetivo: l.objetivo,
     percepcaoAvanco: l.percepcao_avanco,
     avancos: l.avancos,
     dificuldades: l.dificuldades,
@@ -52,7 +55,6 @@ export async function salvarReflexao(r) {
       {
         user_id: r.userId,
         semana_inicio: r.semanaInicio,
-        objetivo: r.objetivo?.trim() || null,
         percepcao_avanco: r.percepcaoAvanco,
         avancos: r.avancos?.trim() || null,
         dificuldades: r.dificuldades?.trim() || null,

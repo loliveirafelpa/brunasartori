@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient'
 
 // Anotações clínicas e medicações: exclusivas da psicóloga (RLS só libera a Admin).
 
-const anotacaoDeBanco = (l) => ({ id: l.id, data: l.data, texto: l.texto, updatedAt: l.updated_at })
+const anotacaoDeBanco = (l) => ({ id: l.id, userId: l.user_id, data: l.data, texto: l.texto, updatedAt: l.updated_at })
 
 export async function listarAnotacoes(userId) {
   const { data, error } = await supabase

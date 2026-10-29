@@ -4,7 +4,7 @@ import { Handshake, Pencil, Target } from 'lucide-react'
 import { useAuth } from '../../lib/AuthContext'
 import { buscarReflexaoDaSemana, inicioDaSemana, listarReflexoes, salvarReflexao } from '../../lib/reflexoesApi'
 import { formatarDia } from '../../lib/sintese'
-import { buscarObjetivosTerapeuticos, listarObjetivosSemana } from '../../lib/objetivosApi'
+import { buscarObjetivosTerapeuticos, listaDeObjetivos, listarObjetivosSemana } from '../../lib/objetivosApi'
 import EscolhaUnica from '../../components/EscolhaUnica'
 import Campo from '../../components/Campo'
 import Botao from '../../components/Botao'
@@ -16,8 +16,7 @@ import Pagina, { Destaque } from '../../components/Pagina'
 function CartaoReflexao({ r, combinado, onEditar }) {
   return (
     <>
-      {combinado && <Linha rotulo="Combinado na sessão">{combinado}</Linha>}
-      {r.objetivo && <Linha rotulo="Objetivo da semana">{r.objetivo}</Linha>}
+      {combinado && <Linha rotulo="Objetivo da semana">{combinado}</Linha>}
       {r.percepcaoAvanco && <Linha rotulo="Avanço percebido">{PERCEPCOES[r.percepcaoAvanco - 1].rotulo}</Linha>}
       {r.avancos && <Linha rotulo="Avanços">{r.avancos}</Linha>}
       {r.dificuldades && <Linha rotulo="O que foi mais difícil">{r.dificuldades}</Linha>}
@@ -28,7 +27,7 @@ function CartaoReflexao({ r, combinado, onEditar }) {
   )
 }
 
-const VAZIO = { objetivo: '', percepcaoAvanco: null, avancos: '', dificuldades: '' }
+const VAZIO = { percepcaoAvanco: null, avancos: '', dificuldades: '' }
 
 const PERCEPCOES = ['Nada', 'Pouco', 'Um pouco', 'Bastante', 'Muito'].map((rotulo, i) => ({ valor: i + 1, rotulo }))
 
@@ -67,7 +66,6 @@ export default function ReflexaoSemanal() {
         if (!r) return
         setJaExistia(true)
         setForm({
-          objetivo: r.objetivo ?? '',
           percepcaoAvanco: r.percepcaoAvanco,
           avancos: r.avancos ?? '',
           dificuldades: r.dificuldades ?? '',
@@ -81,7 +79,7 @@ export default function ReflexaoSemanal() {
   async function salvar(e) {
     e.preventDefault()
     setErro('')
-    if (!combinadoDaSemana && !form.objetivo.trim() && !form.percepcaoAvanco && !form.avancos.trim() && !form.dificuldades.trim()) {
+    if (!form.percepcaoAvanco && !form.avancos.trim() && !form.dificuldades.trim()) {
       return setErro('Responda pelo menos uma das perguntas.')
     }
     setEnviando(true)
@@ -171,29 +169,19 @@ export default function ReflexaoSemanal() {
       }
     >
       <form onSubmit={salvar} className="space-y-5">
-        {combinadoDaSemana && (
-          <section className="rounded-3xl border-l-4 border-verdeAgua bg-branco p-5 shadow-cartao sm:p-7">
-            <p className="flex items-center gap-2 font-interface text-[11px] font-semibold uppercase tracking-[0.14em] text-petroleo">
-              <Handshake size={15} className="text-salvia" aria-hidden /> Combinado na sessão
-            </p>
+        {/* O objetivo da semana é escrito pela psicóloga, a partir do que foi combinado na sessão. */}
+        <section className="rounded-3xl border-l-4 border-verdeAgua bg-branco p-5 shadow-cartao sm:p-7">
+          <p className="flex items-center gap-2 font-interface text-xs font-semibold uppercase tracking-[0.14em] text-petroleo">
+            <Handshake size={15} className="text-salvia" aria-hidden /> Objetivo da semana
+          </p>
+          {combinadoDaSemana ? (
             <p className="mt-3 whitespace-pre-wrap font-titulo text-xl italic leading-snug text-petroleo">“{combinadoDaSemana}”</p>
-          </section>
-        )}
+          ) : (
+            <p className="mt-3 text-sm text-textoSecundario">O objetivo desta semana é combinado com sua psicóloga na sessão e aparece aqui.</p>
+          )}
+        </section>
 
         <Bloco titulo="Sua reflexão">
-          {!combinadoDaSemana && (
-            <Campo
-              rotulo="Objetivo da semana"
-              id="objetivo"
-              multilinha
-              maxLength={2000}
-              placeholder="O que você quer praticar ou observar nesta semana?"
-              ajuda="Ex.: falar com meu chefe quando surgir insegurança, em vez de evitar."
-              value={form.objetivo}
-              onChange={(e) => muda('objetivo')(e.target.value)}
-            />
-          )}
-
           <EscolhaUnica
             nome="percepcao"
             legenda="Quanto você sente que avançou nos seus objetivos esta semana?"
@@ -245,7 +233,14 @@ export default function ReflexaoSemanal() {
       {/* Item fixo, definido pela psicóloga — fica por último. */}
       {objetivosGerais && (
         <Bloco titulo="Seus objetivos na terapia" icone={<Target size={15} />}>
-          <p className="whitespace-pre-wrap font-titulo text-lg leading-relaxed text-petroleo">{objetivosGerais}</p>
+          <ol className="space-y-3">
+            {listaDeObjetivos(objetivosGerais).map((o, i) => (
+              <li key={i} className="flex items-baseline gap-3">
+                <span className="w-5 shrink-0 text-right font-interface text-sm font-semibold text-salvia">{i + 1}.</span>
+                <span className="font-titulo text-lg leading-snug text-petroleo">{o}</span>
+              </li>
+            ))}
+          </ol>
         </Bloco>
       )}
     </Pagina>

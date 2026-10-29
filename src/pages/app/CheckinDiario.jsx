@@ -18,10 +18,31 @@ import { Linha } from '../../components/RegistrosAnteriores'
 import SeletorDeDia from '../../components/SeletorDeDia'
 import Sequencia from '../../components/Sequencia'
 import RodaHorasSono from '../../components/RodaHorasSono'
+import PerguntasModulo from '../../components/PerguntasModulo'
+import { limparRespostas, MODULOS, modulosAtivos, textoResposta } from '../../data/modulos'
+import { diasDesdeUltimoCigarro, pedeAvisoDeCrise } from '../../lib/sinteseModulos'
 
 const escala = (rotulos) => rotulos.map((rotulo, i) => ({ valor: i + 1, rotulo }))
 
+// Respostas dos módulos num registro anterior: "Cigarro — Fumou: Não · Vontade: 6/10".
+function LinhasModulos({ modulos }) {
+  return MODULOS.filter((m) => modulos?.[m.id]).map((m) => {
+    const partes = m.perguntas
+      .map((p) => {
+        const texto = textoResposta(p, modulos[m.id][p.id])
+        return texto && `${p.rotulo.replace(/\?$/, '')}: ${texto}`
+      })
+      .filter(Boolean)
+    return partes.length ? (
+      <Linha key={m.id} rotulo={m.tituloPaciente}>
+        {partes.join(' · ')}
+      </Linha>
+    ) : null
+  })
+}
+
 const VAZIO = {
+  modulos: {},
   humor: null,
   emocao: null,
   emocaoOutra: '',
@@ -53,6 +74,7 @@ function CartaoCheckin({ c, onEditar }) {
       {c.energia && <Linha rotulo="Energia">{ESCALA_ENERGIA[c.energia - 1]}</Linha>}
       {c.exercicio !== null && <Linha rotulo="Movimento">{c.exercicio ? 'Sim' : 'Não'}</Linha>}
       {c.acontecimento && <Linha rotulo="Acontecimento">{c.acontecimento}</Linha>}
+      <LinhasModulos modulos={c.modulos} />
       <Botao variante="secundario" className="mt-2" onClick={() => onEditar(c.data)}>
         <Pencil size={14} aria-hidden /> Editar este dia
       </Botao>
@@ -61,7 +83,8 @@ function CartaoCheckin({ c, onEditar }) {
 }
 
 export default function CheckinDiario() {
-  const { usuario } = useAuth()
+  const { usuario, perfil } = useAuth()
+  const ativos = modulosAtivos(perfil)
   const hoje = hojeLocal()
   const [data, setData] = useState(hoje) // dia sendo preenchido: hoje ou um dia anterior em edição
   const ehHoje = data === hoje
@@ -93,26 +116,37 @@ export default function CheckinDiario() {
           emocaoOutra: c.emocaoOutra ?? '',
           acontecimento: c.acontecimento ?? '',
           situacaoOutra: c.situacaoOutra ?? '',
+          modulos: c.modulos ?? {},
         })
       })
       .catch(() => {})
   }, [usuario.id, data])
 
   const muda = (campo) => (valor) => setForm((f) => ({ ...f, [campo]: valor }))
+  const mudaModulo = (id) => (respostas) => setForm((f) => ({ ...f, modulos: { ...f.modulos, [id]: respostas } }))
 
   async function salvar(e) {
     e.preventDefault()
     setErro('')
     if (!form.humor || !form.emocao) return setErro('Responda pelo menos como você está e a emoção mais presente.')
     setEnviando(true)
+    // Módulos ligados: guarda só as perguntas visíveis. Desligados: mantém o que já havia no dia.
+    const modulos = { ...form.modulos }
+    for (const m of ativos) {
+      const limpas = limparRespostas(m, form.modulos[m.id] ?? {})
+      if (Object.keys(limpas).length) modulos[m.id] = limpas
+      else delete modulos[m.id]
+    }
     try {
       const salvoAgora = await salvarCheckin({
         ...form,
+        modulos,
         userId: usuario.id,
         data,
         sonoHoras: form.sonoHoras === '' ? null : Number(form.sonoHoras),
       })
-      if (!ehHoje) setAnteriores((cs) => cs.map((c) => (c.data === data ? salvoAgora : c)))
+      setAnteriores((cs) => (ehHoje ? cs : cs.map((c) => (c.data === data ? salvoAgora : c))))
+      setForm((f) => ({ ...f, modulos }))
       setSalvo(true)
       if (ehHoje) listarDatasDeCheckin(usuario.id).then((datas) => setSequencia(calcularSequencia(datas))).catch(() => {})
     } catch {
@@ -133,7 +167,8 @@ export default function CheckinDiario() {
   const hojePorExtenso = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   if (salvo) {
-    const humorBaixo = form.humor <= 2
+    const humorBaixo = form.humor <= 2 || pedeAvisoDeCrise(form.modulos)
+    const semFumar = perfil.modulos.tabagismo && ehHoje ? diasDesdeUltimoCigarro([{ data, modulos: form.modulos }, ...anteriores], hoje) : null
     return (
       <Pagina
         sobretitulo={ehHoje ? hojePorExtenso : diaPorExtenso}
@@ -156,6 +191,14 @@ export default function CheckinDiario() {
       >
         {humorBaixo && <AvisoCrise destaque />}
         {ehHoje && sequencia && <Sequencia sequencia={sequencia} />}
+        {semFumar > 0 && (
+          <Bloco>
+            <p className="font-titulo text-xl leading-snug text-petroleo">
+              {semFumar} {semFumar === 1 ? 'dia' : 'dias'} sem fumar.
+            </p>
+            <p className="-mt-6 text-sm text-textoSecundario">Cada dia conta. Se a vontade apertar, lembre do que combinou na sessão.</p>
+          </Bloco>
+        )}
         <Bloco>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link
@@ -254,6 +297,12 @@ export default function CheckinDiario() {
 
           <EscolhaUnica nome="exercicio" legenda="Você se movimentou hoje?" opcoes={MOVIMENTO} valor={form.exercicio} onChange={muda('exercicio')} colunas={2} />
         </Bloco>
+
+        {ativos.map((m) => (
+          <Bloco key={m.id} titulo={m.tituloPaciente}>
+            <PerguntasModulo modulo={m} respostas={form.modulos[m.id]} onChange={mudaModulo(m.id)} />
+          </Bloco>
+        ))}
 
         <Bloco titulo="Seu dia">
           <Campo

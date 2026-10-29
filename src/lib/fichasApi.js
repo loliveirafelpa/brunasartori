@@ -9,6 +9,7 @@ function deBanco(l) {
     whatsapp: l.whatsapp,
     inicioAcompanhamento: l.inicio_acompanhamento,
     historico: l.historico,
+    consulta: l.consulta, // horário fixo { diaSemana, hora, frequencia, referencia } ou null (ver data/consulta.js)
     updatedAt: l.updated_at,
   }
 }
@@ -17,6 +18,13 @@ export async function buscarFicha(userId) {
   const { data, error } = await supabase.from('fichas_pacientes').select('*').eq('user_id', userId).limit(1)
   if (error) throw error
   return data[0] ? deBanco(data[0]) : null
+}
+
+// Fichas de todos os pacientes (para a lista: consulta mais próxima).
+export async function listarFichas() {
+  const { data, error } = await supabase.from('fichas_pacientes').select('*')
+  if (error) throw error
+  return data.map(deBanco)
 }
 
 export async function salvarFicha(f) {
@@ -29,6 +37,7 @@ export async function salvarFicha(f) {
         whatsapp: f.whatsapp?.trim() || null,
         inicio_acompanhamento: f.inicioAcompanhamento,
         historico: f.historico?.trim() || null,
+        consulta: f.consulta ?? null,
       },
       { onConflict: 'user_id' },
     )

@@ -5,7 +5,8 @@ function deBanco(linha) {
     id: linha.id,
     role: linha.role,
     nome: linha.nome,
-    registroPensamentosAtivo: linha.registro_pensamentos_ativo,
+    modulos: linha.modulos ?? {}, // { tabagismo: true, ... } (ver data/modulos.js)
+    escalas: linha.escalas ?? {}, // { epds: { frequencia, ativadaEm, pedidoEm } } (ver data/escalas.js)
     acompanhamentoEncerradoEm: linha.acompanhamento_encerrado_em,
     createdAt: linha.created_at,
   }
@@ -34,9 +35,26 @@ export async function buscarPerfil(id) {
   return deBanco(data)
 }
 
-// Só a Admin consegue alterar (garantido por gatilho no banco).
-export async function definirRegistroPensamentos(id, ativo) {
-  const { error } = await supabase.from('profiles').update({ registro_pensamentos_ativo: ativo }).eq('id', id)
+async function lerJson(id, coluna) {
+  const { data, error } = await supabase.from('profiles').select(coluna).eq('id', id).single()
+  if (error) throw error
+  return data[coluna] ?? {}
+}
+
+// Liga ou desliga um módulo/protocolo (ver data/modulos.js) para o paciente. Só a Admin (gatilho no banco).
+export async function definirModulo(id, moduloId, ativo) {
+  const modulos = { ...(await lerJson(id, 'modulos')), [moduloId]: ativo }
+  const { error } = await supabase.from('profiles').update({ modulos }).eq('id', id)
+  if (error) throw error
+}
+
+// Liga, ajusta ou desliga (`config` null) o questionário de um módulo. Só a Admin (gatilho no banco).
+// `config`: { frequencia: 'unica' | 14 | 30, ativadaEm, pedidoEm }.
+export async function definirEscala(id, escalaId, config) {
+  const escalas = { ...(await lerJson(id, 'escalas')) }
+  if (config) escalas[escalaId] = config
+  else delete escalas[escalaId]
+  const { error } = await supabase.from('profiles').update({ escalas }).eq('id', id)
   if (error) throw error
 }
 

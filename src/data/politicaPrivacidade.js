@@ -15,7 +15,7 @@ export const SECOES_POLITICA = [
     titulo: 'Quais dados guardamos',
     itens: [
       'Cadastro: nome, e-mail e, se você informou, WhatsApp.',
-      'O que você registra: humor, emoções, situações, ansiedade, sono, energia, movimento, acontecimentos, reflexões semanais e registros de pensamento.',
+      'O que você registra: humor, emoções, situações, ansiedade, sono, energia, movimento, hábitos (como cigarro e bebida, quando ativados pela psicóloga), respostas dos protocolos e questionários, crises registradas, acontecimentos, reflexões semanais e registros de pensamento.',
       'Registros da psicóloga: ficha, histórico, anotações clínicas e medicações. Só ela tem acesso a esses registros.',
       'Seus aceites: a data e a hora em que você aceitou os termos e o uso de dados de saúde.',
     ],
