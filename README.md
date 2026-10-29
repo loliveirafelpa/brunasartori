@@ -46,7 +46,7 @@ Projeto Supabase `bruna-sartori-checkin` (ref `qjkauulkxmezcuzondzj`, região S�
 | `profiles` | papel, nome, `modulos` e `escalas` (jsonb: módulos e questionários ligados), data de encerramento do acompanhamento (`registro_pensamentos_ativo` ficou sem uso) | paciente lê o seu e muda só o nome; Admin lê todos, liga/desliga módulos e questionários e encerra/reabre o acompanhamento |
 | `consentimentos` | aceites (termos, dado de saúde), versão, data/hora, revogação | paciente cria/revoga os seus; Admin lê |
 | `checkins` | um por dia: humor, emoção, situações, ansiedade 0–10, sono (horas numa roda de rolagem, `RodaHorasSono`, de meia em meia hora), energia, movimento, acontecimento e `modulos` (jsonb com as respostas dos módulos) | paciente; Admin só lê |
-| `reflexoes_semanais` | percepção de avanço, avanços, dificuldades (a coluna antiga `objetivo` fica só para não perder o que foi escrito) | paciente; Admin só lê |
+| `reflexoes_semanais` | percepção de avanço, avanços, dificuldades (o objetivo escrito pelo paciente foi removido em 29/10/2026, com o histórico) | paciente; Admin só lê |
 | `questionarios` | EPDS ou GAD-7: respostas item a item e total (calculado no banco por gatilho) | paciente; Admin só lê |
 | `questionarios_adiados` | "Responder mais tarde": até que dia o aviso fica escondido | só o paciente |
 | `crises` | crises de ansiedade: quando, intensidade, duração, lugar, sintomas, o que fez, o que ajudou | paciente; Admin só lê |
